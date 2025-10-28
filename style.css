@@ -1,0 +1,216 @@
+/* --- Variables de Color (Según tu paleta) --- */
+:root {
+    --color-black: #000000;
+    --color-purple: #4B0082;
+    --color-blue: #0077FF;
+    --color-green: #00FF99;
+    --color-white: #f4f4f4;
+    --color-grey: #1a1a1a;
+}
+
+/* --- Reseteo y Base --- */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Roboto', sans-serif;
+    background-color: var(--color-black);
+    color: var(--color-white);
+    line-height: 1.6;
+}
+
+.container {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+h1, h2, h3, h4 {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 15px;
+    text-transform: uppercase;
+}
+
+p {
+    margin-bottom: 15px;
+}
+
+a {
+    text-decoration: none;
+    color: var(--color-blue);
+}
+
+/* --- Encabezado y Logo --- */
+.header {
+    text-align: center;
+    padding: 30px 20px;
+}
+
+.logo {
+    max-width: 150px;
+    height: auto;
+    border-radius: 50%;
+    border: 3px solid var(--color-blue);
+    margin-bottom: 15px;
+}
+
+.header h1 {
+    font-size: 2rem;
+    color: var(--color-white);
+    font-weight: 900;
+    letter-spacing: 2px;
+}
+
+/* --- Secciones Generales --- */
+section {
+    padding: 60px 0;
+    text-align: center;
+}
+
+section:not(.hero) {
+    border-bottom: 1px solid #222;
+}
+
+/* --- Sección Hero --- */
+.hero {
+    background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('slange-logo.jpeg');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    padding: 80px 0;
+}
+
+.hero h2 {
+    font-size: 2.8rem;
+    color: var(--color-white);
+    font-weight: 900;
+}
+
+.hero p {
+    font-size: 1.2rem;
+    color: #ccc;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.hero strong {
+    color: var(--color-green);
+    font-weight: 700;
+}
+
+/* --- Sección Filosofía --- */
+.philosophy {
+    background-color: var(--color-grey);
+}
+
+.philosophy h3 {
+    font-size: 1.8rem;
+    color: var(--color-blue);
+}
+
+.philosophy p {
+    max-width: 700px;
+    margin: 0 auto;
+    font-size: 1.1rem;
+}
+
+/* --- Sección Pilares --- */
+.pillars h2 {
+    font-size: 2rem;
+    color: var(--color-white);
+}
+
+.pillar-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 25px;
+    margin-top: 30px;
+    text-align: left;
+}
+
+.pillar {
+    background: var(--color-grey);
+    padding: 25px;
+    border-radius: 8px;
+    border-left: 4px solid var(--color-green); /* Acento neón */
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.pillar:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0, 255, 153, 0.1);
+}
+
+.pillar h4 {
+    font-size: 1.3rem;
+    color: var(--color-blue);
+    margin-bottom: 10px;
+}
+
+/* --- Sección Promesa --- */
+.promise {
+    background-color: var(--color-purple); /* Usamos el morado oscuro */
+}
+
+.promise h3 {
+    font-size: 1.8rem;
+    font-style: italic;
+    color: var(--color-white);
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+/* --- Sección CTA --- */
+.cta h2 {
+    font-size: 2.2rem;
+    color: var(--color-green); /* Llamativo */
+}
+
+.cta p {
+    font-size: 1.1rem;
+    max-width: 600px;
+    margin: 0 auto 25px auto;
+}
+
+.cta-button {
+    display: inline-block;
+    background-color: var(--color-blue);
+    color: var(--color-white);
+    padding: 15px 35px;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    border-radius: 5px;
+    transition: all 0.3s ease;
+    border: 2px solid var(--color-blue);
+}
+
+.cta-button:hover {
+    background-color: var(--color-green);
+    color: var(--color-black);
+    border-color: var(--color-green);
+    transform: scale(1.05);
+    box-shadow: 0 0 20px rgba(0, 255, 153, 0.5);
+}
+
+/* --- Footer --- */
+.footer {
+    text-align: center;
+    padding: 30px 20px;
+    background-color: #050505;
+    font-size: 0.9rem;
+    color: #888;
+}
+
+/* --- Animación de Scroll --- */
+.hidden {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+}

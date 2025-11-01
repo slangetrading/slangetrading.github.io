@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Slange Trading - Presentación de Negocios</title>
+    
+    <!-- Enlace a fuente Orbitron -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400..900&display=swap" rel="stylesheet">
+    
+    <!-- Carga de Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Definición de la paleta de colores oficial de Slange Trading */
+        :root {
+            --color-primary-dark: #000000; 
+            --color-secondary-deep: #4B0082; /* Índigo Oscuro / Morado Profundo */
+            --color-accent-blue: #0077FF; 
+            --color-accent-neon: #00FF99; 
+            --color-accent-red: #FF0044; 
+            --color-text-light: #E5E7EB; 
+            --color-purple-neon: #A855F7; /* Morado brillante para el destello */
+        }
+        body {
+            font-family: 'Orbitron', sans-serif;
+            background-color: var(--color-primary-dark);
+            color: var(--color-text-light); 
+            overflow-x: hidden; /* Evita el scroll horizontal */
+        }
+
+        /* --- CONTENEDOR DE VIDEOS DE FONDO (Optimizado para Cubrir y Centrar) --- */
+        .video-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: -10;
+        }
+
+        .video-background video {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            /* Asegura que el video cubra completamente la pantalla */
+            min-width: 100vw; 
+            min-height: 100vh;
+            width: auto;
+            height: auto;
+            /* Centrado absoluto */
+            transform: translate(-50%, -50%);
+            object-fit: cover;
+            /* Filtro aplicado para opacidad tenue y contraste */
+            filter: grayscale(80%) brightness(0.7); 
+            transition: opacity 1s ease-in-out; 
+            opacity: 0; 
+            pointer-events: none; /* EVITA LA INTERACCIÓN Y LA BARRA DE REPRODUCCIÓN AL HACER HOVER */
+        }
+        
+        /* Reglas específicas para ocultar controles de video forzados por algunos navegadores (Ej: Webkit) */
+        .video-background video::-webkit-media-controls {
+            display: none !important;
+        }
+        .video-background video::controls {
+            display: none !important;
+        }
+
+        .video-background video.active {
+            opacity: 1; 
+        }
+        /* --- FIN CONTENEDOR DE VIDEOS --- */
+
+        .slide-container {
+            height: 100vh;
+            width: 100vw;
+            display: flex;
+            transition: transform 0.5s ease-in-out;
+            will-change: transform;
+        }
+        .slide {
+            min-width: 100vw;
+            height: 100vh;
+            /* Padding base más reducido para móviles */
+            padding: 2rem 1rem; 
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            justify-content: center; 
+            align-items: center;
+            position: relative;
+        }
+        
+        .slide::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 0; 
+            opacity: 0.85; /* Opacidad tenue en el overlay */
+            pointer-events: none;
+            background-blend-mode: multiply; 
+        }
+
+        .slide-dark::before {
+            background-color: var(--color-primary-dark);
+            background-image: linear-gradient(rgba(75, 0, 130, 0.3), rgba(0, 0, 0, 0.8)); 
+        }
+
+        .slide > div {
+            position: relative; 
+            z-index: 1; 
+            width: 100%; 
+            padding-bottom: 0rem; 
+            max-height: 100%; 
+            overflow-y: auto; 
+        }
+
+        /* --- ESTILOS DE ANIMACIÓN DE MOVIMIENTO SUTIL --- */
+
+        /* 1. Definición de Keyframes para Movimiento Sutil */
+        @keyframes subtle-move {
+            0%, 100% {
+                transform: translateY(0) rotate(0deg) scale(1.0);
+            }
+            50% {
+                transform: translateY(-3px) rotate(0.2deg) scale(1.01); /* Movimiento y escala sutil */
+            }
+        }
+        .animated-move {
+            animation: subtle-move 4s ease-in-out infinite alternate;
+        }
+
+        /* --- FIN ESTILOS DE ANIMACIÓN --- */
+        
+        /* ---------------------------------------------------- */
+        /* --- ESTILOS DEL EFECTO DE ESCRITURA (DIAPOSITIVA 10) --- */
+        /* ---------------------------------------------------- */
+        
+        /* Estilo base de la línea de texto que se va a escribir */
+        .typing-line {
+            overflow: hidden; /* Esconde el exceso de texto */
+            white-space: nowrap; /* Mantiene el texto en una sola línea */
+            width: 0; /* Inicialmente invisible */
+            border-right: 3px solid var(--color-accent-neon); /* Cursor */
+            animation: none; /* Se activa con la clase 'slide-active' */
+            display: inline-block;
+            padding-right: 5px;
+        }
+        
+        /* Animación de Título: 1.5s para 20 caracteres aprox */
+        .slide-active #title-typing {
+            /* IMPORTANTE: Usar forwards para mantener el estado final (width: 20ch) */
+            animation: 
+                typing-title 1.5s steps(20, end) forwards,
+                blink 0.75s step-end infinite; /* Parpadea mientras se escribe */
+        }
+
+        @keyframes typing-title {
+            from { width: 0 }
+            to { width: 20ch } 
+        }
+        
+        /* Animación de Párrafo: 3s para 68 caracteres aprox. Comienza con un delay de 2s (1.5s del título + 0.5s) */
+        .slide-active #text-typing {
+             /* IMPORTANTE: Usar forwards para mantener el estado final (width: 68ch) */
+            animation: 
+                typing-text 3s steps(68, end) 2s forwards, 
+                blink 0.75s step-end infinite 2s; /* El parpadeo inicia a los 2s */
+        }
+
+        @keyframes typing-text {
+             from { width: 0 }
+             to { width: 68ch } 
+        }
+
+        /* Definición de la animación del cursor (blink) */
+        @keyframes blink {
+            from, to { border-color: transparent }
+            50% { border-color: var(--color-accent-neon); } /* Cursor en color neón */
+        }
+        
+        /* OCULTAR EL CURSOR DEL TÍTULO cuando termina su animación (1.5s) */
+        .slide-active #title-typing.finished {
+            border-right: none;
+            /* La animación de texto ya tiene forwards, solo desactivamos el blink/cursor */
+            animation: typing-title 1.5s steps(20, end) forwards; 
+        }
+
+        /* OCULTAR EL CURSOR DEL PÁRRAFO cuando termina su animación (4.5s) */
+        .slide-active #text-typing.finished {
+            border-right: none;
+            /* La animación de texto ya tiene forwards, solo desactivamos el blink/cursor */
+            animation: typing-text 3s steps(68, end) 2s forwards; 
+        }
+
+        /* --- ESTILOS DE COMPONENTES INTERACTIVOS --- */
+
+        /* Tarjeta de Contenido (.card) - Mantiene el destello morado */
+        .card {
+            background-color: rgba(75, 0, 130, 0.7); 
+            color: var(--color-text-light);
+            padding: 1rem; 
+            border-radius: 10px; 
+            box-shadow: 0 0 10px rgba(0, 255, 153, 0.05); 
+            transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out, border-color 0.3s; /* Asegura la transición del borde */
+            border: 1px solid rgba(75, 0, 130, 0.5);
+            backdrop-filter: blur(5px); 
+            cursor: default;
+        }
+        
+        /* EFECTO HOVER NEÓN Morado para Tarjetas */
+        .card:hover {
+            transform: translateY(-5px); 
+            /* Se aplica el box-shadow de NEÓN MORADO */
+            box-shadow: 
+                0 0 5px var(--color-purple-neon),   /* Destello primario */
+                0 0 15px var(--color-purple-neon),  /* Destello medio */
+                0 0 25px var(--color-secondary-deep); /* Destello grande y difuso */
+            /* El borde se vuelve morado neón brillante */
+            border-color: var(--color-purple-neon); 
+        }
+
+        .text-gradient {
+            background-image: linear-gradient(to right, var(--color-accent-blue), var(--color-accent-neon));
+            -webkit-background-clip: text;
+            color: transparent;
+        }
+
+        /* Botón Neón Principal (.btn-neon) - ESTILO DE BORDE VERDE */
+        .btn-neon {
+            background-color: var(--color-primary-dark); 
+            color: var(--color-accent-neon); 
+            border: 2px solid var(--color-accent-neon); 
+            font-weight: 800;
+            padding: 0.5rem 2rem; 
+            border-radius: 9999px;
+            box-shadow: 0 0 15px rgba(0, 255, 153, 0.2); 
+            transition: all 0.3s;
+            font-size: 1rem; 
+        }
+        /* EFECTO HOVER NEÓN VERDE */
+        .btn-neon:hover {
+            background-color: rgba(0, 255, 153, 0.1); 
+            box-shadow: 0 0 20px var(--color-accent-neon), 0 0 5px rgba(0, 0, 0, 0.5);
+            transform: scale(1.03); 
+        }
+
+        /* Botón de Acción con Borde Azul (Agenda tu Plan de Acción) */
+        .btn-action-border {
+            border: 2px solid var(--color-accent-blue);
+            color: var(--color-accent-blue); 
+            background-color: var(--color-primary-dark);
+            transition: all 0.3s ease-in-out;
+        }
+        /* EFECTO HOVER NEÓN AZUL */
+        .btn-action-border:hover {
+            background-color: rgba(0, 119, 255, 0.1); 
+            box-shadow: 
+                0 0 5px var(--color-accent-blue), 
+                0 0 15px var(--color-accent-blue); 
+            transform: scale(1.03);
+            border-color: var(--color-accent-blue);
+        }
+
+        /* Badge/Etiqueta (Control y Evolución) - MODIFICADO */
+        .badge-neon {
+            background-color: rgba(75, 0, 130, 0.15);
+            color: var(--color-secondary-deep); /* Texto en morado profundo */
+            border: 2px solid var(--color-secondary-deep); /* Borde en morado profundo */
+            padding: 0.75rem 2rem; 
+            font-size: 1.125rem; 
+            box-shadow: 0 0 10px rgba(75, 0, 130, 0.3);
+            transition: all 0.3s ease-in-out;
+            cursor: pointer; /* Lo hacemos clickeable */
+            
+            position: relative; 
+            overflow: hidden; 
+            /* Se mantiene el animated-move, pero se elimina el pseudo-elemento ::after */
+        }
+        
+        /* EFECTO HOVER NEÓN Morado para Badge - Mismo efecto de destello que los cards */
+        .badge-neon:hover {
+            /* El hover sobreescribe la transformación del movimiento */
+            transform: translateY(-5px) scale(1.05); 
+            box-shadow: 
+                /* Mismo efecto de destello morado que las tarjetas */
+                0 0 5px var(--color-purple-neon),   
+                0 0 15px var(--color-purple-neon),  
+                0 0 25px var(--color-secondary-deep); 
+            border-color: var(--color-purple-neon); /* Borde se vuelve neón */
+            color: var(--color-purple-neon); /* El texto se vuelve neón */
+        }
+        
+        /* Eliminamos el efecto de barrido del badge */
+        .badge-neon::after {
+            content: none;
+        }
+
+
+        /* Logotipo (Clase agregada para interacciones) */
+        .logo-interact:hover {
+            transform: scale(1.05);
+            filter: drop-shadow(0 0 25px var(--color-accent-neon)) !important; 
+        }
+        .logo-interact {
+            transition: all 0.3s ease-in-out;
+            cursor: pointer;
+        }
+
+
+        /* --- ESTILOS DE NAVEGACIÓN (Flechas para Móvil) --- */
+        .nav-btn-mobile {
+            position: fixed;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 20; 
+            background: none;
+            border: none;
+            font-size: 3rem; 
+            cursor: pointer;
+            padding: 0.5rem;
+            transition: color 0.3s, opacity 0.3s;
+            text-shadow: 0 0 10px rgba(0, 0, 0, 0.5); 
+        }
+        
+        #prev-btn-mobile {
+            left: 0.5rem;
+            color: var(--color-accent-neon); 
+        }
+
+        #next-btn-mobile {
+            right: 0.5rem;
+            color: var(--color-accent-blue); 
+        }
+        
+        .nav-btn-mobile:disabled {
+            opacity: 0; 
+            pointer-events: none;
+        }
+
+        /* --- ESTILOS DE NAVEGACIÓN (Texto para Escritorio, Centrado Vertical) --- */
+        .nav-btn-desktop {
+            position: fixed; /* Fijo en la pantalla */
+            top: 50%; /* Centrado verticalmente */
+            transform: translateY(-50%);
+            padding: 0.5rem 1.5rem; /* Padding más generoso */
+            font-size: 1.125rem; /* Un poco más grande para destacar */
+            font-weight: bold;
+            border-radius: 0.5rem;
+            transition: all 0.3s;
+            cursor: pointer;
+            z-index: 20; 
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .nav-btn-desktop:disabled {
+            opacity: 0.3;
+            cursor: default;
+            box-shadow: none;
+        }
+        
+        /* Responsive: Volver a layout de escritorio para pantallas grandes */
+        @media (min-width: 768px) {
+            .slide {
+                padding: 6rem 8rem;
+            }
+             /* Ocultar botones móviles en escritorio */
+            .nav-btn-mobile {
+                display: none !important; 
+            }
+            
+            /* Posicionamiento específico de botones de escritorio */
+            #prev-btn-desktop {
+                left: 2rem;
+                background-color: var(--color-primary-dark);
+                color: var(--color-accent-neon);
+                border: 2px solid var(--color-accent-neon);
+            }
+            #prev-btn-desktop:hover:not(:disabled) {
+                background-color: rgba(0, 255, 153, 0.1);
+                box-shadow: 0 0 20px var(--color-accent-neon);
+            }
+
+            #next-btn-desktop {
+                right: 2rem;
+                background-color: var(--color-primary-dark);
+                color: var(--color-accent-blue);
+                border: 2px solid var(--color-accent-blue);
+            }
+            #next-btn-desktop:hover:not(:disabled) {
+                background-color: rgba(0, 119, 255, 0.1);
+                box-shadow: 0 0 20px var(--color-accent-blue);
+            }
+        }
+
+        /* Ocultar botones de escritorio en móvil */
+        @media (max-width: 767px) {
+            .nav-btn-desktop {
+                display: none !important;
+            }
+        }
+
+    </style>
+    <script>
+        // Lógica de navegación de diapositivas
+        let currentSlide = 0;
+        // Se mantiene en 10 diapositivas
+        const totalSlides = 10; 
+
+        document.addEventListener('DOMContentLoaded', () => {
+            updateSlidePosition(); 
+            updateVideoBackground(); 
+
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowRight' || e.key === ' ') {
+                    nextSlide();
+                } else if (e.key === 'ArrowLeft') {
+                    prevSlide();
+                }
+            });
+
+            // Conectar botones de MÓVIL (flechas)
+            document.getElementById('next-btn-mobile').addEventListener('click', nextSlide);
+            document.getElementById('prev-btn-mobile').addEventListener('click', prevSlide);
+
+            // Conectar botones de ESCRITORIO (texto)
+            document.getElementById('next-btn-desktop').addEventListener('click', nextSlide);
+            document.getElementById('prev-btn-desktop').addEventListener('click', prevSlide);
+        });
+
+        function updateSlidePosition() {
+            const container = document.getElementById('slide-container');
+            if (container) {
+                const offset = -currentSlide * 100;
+                container.style.transform = `translateX(${offset}vw)`;
+                updateButtonState();
+                updateVideoBackground(); 
+            }
+            
+            // Lógica de Diapositiva 10 (Índice 9) - Efecto de Escritura
+            const isLastSlide = currentSlide === totalSlides - 1;
+            const slide10 = document.getElementById('slide-10');
+            const titleTyping = document.getElementById('title-typing'); // Nuevo
+            const textTyping = document.getElementById('text-typing');
+
+            if (slide10) {
+                if (isLastSlide) {
+                    // Activar animaciones CSS
+                    slide10.classList.add('slide-active'); 
+
+                    // 1. Ocultar cursor del TÍTULO después de 1.5s
+                    setTimeout(() => {
+                        if (titleTyping) {
+                            titleTyping.classList.add('finished');
+                        }
+                    }, 1500); 
+
+                    // 2. Ocultar cursor del PÁRRAFO después de 5s (1.5s + 0.5s + 3s)
+                    setTimeout(() => {
+                        if (textTyping) {
+                            textTyping.classList.add('finished');
+                        }
+                    }, 5000); 
+
+                } else {
+                    // Si no es la última diapositiva, resetear el estado
+                    slide10.classList.remove('slide-active');
+                    // Reiniciar ambos textos (elimina la clase 'finished' para que el efecto se repita)
+                    if (titleTyping) titleTyping.classList.remove('finished'); 
+                    if (textTyping) textTyping.classList.remove('finished'); 
+                }
+            }
+        }
+
+        function nextSlide() {
+            if (currentSlide < totalSlides - 1) {
+                currentSlide++;
+                updateSlidePosition();
+            }
+        }
+
+        function prevSlide() {
+            if (currentSlide > 0) {
+                currentSlide--;
+                updateSlidePosition();
+            }
+        }
+
+        /**
+         * Actualiza el estado (enabled/disabled) de los botones de navegación
+         */
+        function updateButtonState() {
+            // Botones de Móvil (Flechas)
+            const prevBtnMobile = document.getElementById('prev-btn-mobile');
+            const nextBtnMobile = document.getElementById('next-btn-mobile');
+            
+            // Botones de Escritorio (Texto)
+            const prevBtnDesktop = document.getElementById('prev-btn-desktop');
+            const nextBtnDesktop = document.getElementById('next-btn-desktop');
+
+            // Lógica de Estado
+            const isFirstSlide = currentSlide === 0;
+            const isLastSlide = currentSlide === totalSlides - 1;
+
+            // Aplicar a botones móviles
+            prevBtnMobile.disabled = isFirstSlide;
+            prevBtnMobile.style.opacity = isFirstSlide ? '0' : '0.8';
+
+            nextBtnMobile.disabled = isLastSlide;
+            nextBtnMobile.style.opacity = isLastSlide ? '0' : '0.8';
+
+            // Aplicar a botones de escritorio
+            prevBtnDesktop.disabled = isFirstSlide;
+            nextBtnDesktop.disabled = isLastSlide;
+        }
+
+        /**
+         * Actualiza el video de fondo basándose en el índice de la diapositiva (alterna Dark/Deep).
+         */
+        function updateVideoBackground() {
+            const videoDark = document.getElementById('video-dark');
+            const videoDeep = document.getElementById('video-deep');
+
+            let targetVideo = null;
+            let otherVideo = null;
+
+            // Lógica de alternancia: 
+            // Slides 0, 2, 4, 6, 8... (índice par) usan el video 'Dark'
+            // Slides 1, 3, 5, 7, 9... (índice impar) usan el video 'Deep'
+            if (currentSlide % 2 === 0) { 
+                targetVideo = videoDark;
+                otherVideo = videoDeep;
+            } else { 
+                targetVideo = videoDeep;
+                otherVideo = videoDark;
+            }
+
+            if (!targetVideo) return;
+
+            // 1. Pausar y ocultar el video NO objetivo (si está activo)
+            if (otherVideo && otherVideo.classList.contains('active')) {
+                otherVideo.classList.remove('active');
+                otherVideo.pause();
+            }
+
+            // 2. Si el video objetivo ya está activo, no hacemos nada.
+            if (targetVideo.classList.contains('active')) {
+                return;
+            }
+            
+            // 3. Activar y reproducir el video objetivo
+            targetVideo.classList.add('active');
+            targetVideo.currentTime = 0; // Reinicia el video
+
+            setTimeout(() => {
+                targetVideo.play().catch(e => {
+                    console.error("Error al reproducir el video:", e.name, e.message);
+                });
+            }, 50); 
+        }
+    </script>
+</head>
+<body class="overflow-x-hidden">
+
+    <!-- BOTONES DE NAVEGACIÓN DE ESCRITORIO (FIJOS Y CENTRADOS) -->
+    <!-- Botón Anterior (Estilo de escritorio, Centrado Vertical) -->
+    <button id="prev-btn-desktop" class="nav-btn-desktop">
+        ← Anterior
+    </button>
+    <!-- Botón Siguiente (Estilo de escritorio, Centrado Vertical) -->
+    <button id="next-btn-desktop" class="nav-btn-desktop">
+        Siguiente →
+    </button>
+
+
+    <!-- Contenedor de Videos de Fondo -->
+<div class="video-background">
+        <!-- VIDEO DARK: https://i.imgur.com/R0z0Cd8.mp4 (índice par) -->
+        <!-- NOTA: La barra de reproducción está oculta porque el atributo 'controls' no está presente 
+             y el CSS ahora tiene 'pointer-events: none;' -->
+        <video loop muted playsinline id="video-dark">
+            <source src="https://i.imgur.com/R0z0Cd8.mp4" type="video/mp4">
+            Tu navegador no soporta el video de fondo.
+        </video>
+        
+        <!-- VIDEO DEEP: https://i.imgur.com/BtVHWdg.mp4 (índice impar) -->
+        <!-- NOTA: La barra de reproducción está oculta porque el atributo 'controls' no está presente 
+             y el CSS ahora tiene 'pointer-events: none;' -->
+        <video loop muted playsinline id="video-deep">
+            <source src="https://i.imgur.com/BtVHWdg.mp4" type="video/mp4"> 
+            Tu navegador no soporta el video de fondo.
+        </video>
+    </div>
+
+    <!-- Contenedor de Diapositivas -->
+<div id="slide-container" class="slide-container">
+
+        <!-- DIAPOSITIVA 1: INTRODUCCIÓN (Mantiene índice 0) -->
+<div class="slide slide-dark text-center">
+            <div class="max-w-4xl mx-auto flex flex-col items-center justify-center h-full"> 
+                
+                <!-- Logotipo con nueva clase de interacción -->
+                <img 
+                    src="https://i.imgur.com/HcI3LE1.png" 
+                    alt="Logotipo Slange Trading - Serpiente sobre ST" 
+                    class="w-32 h-32 md:w-48 md:h-48 mx-auto mb-4 object-contain logo-interact"
+                    style="filter: drop-shadow(0 0 15px rgba(0, 255, 153, 0.5));"
+                >
+                <h1 class="text-4xl md:text-7xl font-extrabold mb-2 text-white leading-tight"> 
+                    <span class="text-gradient">SLANGE TRADING</span>
+                </h1>
+                <h2 class="text-xl md:text-4xl font-light mb-6 text-gray-300">
+                    Dominio, Precisión y Evolución Financiera
+                </h2>
+                <p class="text-lg italic mb-8 text-gray-400">
+                    “Libertad y estrategia en cada movimiento.”
+                </p>
+                <!-- Usa la clase btn-neon que ahora tiene estilo de borde -->
+                <button onclick="nextSlide()" class="btn-neon text-base">
+                    Aprende con una comunidad real y honesta →
+                </button>
+            </div>
+        </div>
+
+        <!-- DIAPOSITIVA 2: METODOLOGÍA PARTE 1 (NUEVA) -->
+<div class="slide slide-dark text-center"> 
+            <div class="max-w-5xl mx-auto flex flex-col items-center justify-center h-full">
+                <h2 class="text-3xl md:text-5xl font-extrabold mb-8 text-white">
+                    Nuestra Metodología de Precisión
+                </h2>
+                <!-- Cuadros 1 y 2 - El contenedor tiene mx-auto para asegurar el centrado -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-left max-w-2xl mx-auto">
+                    <div class="card border-t-4" style="border-color: var(--color-primary-dark);"> 
+                        <h3 class="text-xl font-bold mb-2 text-white">Fundamentos y Estrategia</h3>
+                        <p class="text-sm text-gray-300">Dominio de los fundamentos del mercado y enfoque Smart Money para el ataque.</p>
+                    </div>
+                    <div class="card border-t-4" style="border-color: var(--color-primary-dark);"> 
+                        <h3 class="text-xl font-bold mb-2 text-white">Psicotrading y Control</h3>
+                        <p class="text-sm text-gray-300">Gestión de riesgo y Psicología para una mente fría y control emocional absoluto.</p>
+                    </div>
+                </div>
+                <!-- Frase de cierre de la diapositiva original -->
+                <p class="text-base mt-10 text-center text-gray-200 font-bold">
+                    "El mercado no se domina con suerte."
+                </p>
+            </div>
+        </div>
+        
+        <!-- DIAPOSITIVA 3: METODOLOGÍA PARTE 2 (NUEVA) -->
+<div class="slide slide-dark text-center"> 
+            <div class="max-w-5xl mx-auto flex flex-col items-center justify-center h-full">
+                <h2 class="text-3xl md:text-5xl font-extrabold mb-2 text-white">
+                    Transformamos Novatos a Traders Rentables
+                </h2>
+                <p class="text-lg md:text-2xl text-gray-300 mb-8 font-light">
+                    Disciplinados e independientes
+                </p>
+                <!-- Cuadros 3 y 4 - El contenedor tiene mx-auto para asegurar el centrado -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-left max-w-2xl mx-auto">
+                    <div class="card border-t-4" style="border-color: var(--color-primary-dark);"> 
+                        <h3 class="text-xl font-bold mb-2 text-white">Plan de Trading</h3>
+                        <p class="text-sm text-gray-300">Creación de un Plan de Trading personalizado y adaptado exclusivamente a tus necesidades.</p>
+                    </div>
+                    <div class="card border-t-4" style="border-color: var(--color-primary-dark);"> 
+                        <h3 class="text-xl font-bold mb-2 text-white">Resultados</h3>
+                        <p class="text-sm text-gray-300">Obten resultados medibles, y asesoramiento continuo para tu crecimiento como trader.</p>
+                    </div>
+                </div>
+                <!-- Frase de cierre de la diapositiva original -->
+                <p class="text-base mt-10 text-center text-gray-200 font-bold">
+                    "con mente fría y estrategia."
+                </p>
+            </div>
+        </div>
+
+        <!-- DIAPOSITIVA 4: PROPÓSITO Y DESTINO (Mantiene índice 3) -->
+<div class="slide slide-dark text-center">
+            <div class="max-w-4xl mx-auto flex flex-col items-center justify-center h-full">
+                <h2 class="text-3xl md:text-5xl font-extrabold mb-8 text-white">
+                    Nuestro Propósito y Destino
+                </h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-left w-full mx-auto"> 
+                    
+                    <div class="card p-4 flex flex-col items-center text-center" style="border-top: 4px solid var(--color-accent-neon);">
+                        <p class="text-4xl mb-2" style="color: var(--color-accent-neon);">🚀</p>
+                        <h3 class="text-xl font-bold mb-2">Nuestra Misión</h3>
+                        <p class="text-sm text-gray-300">
+                            Formamos <span class="font-bold">traders reales</span> con educación precisa y disciplinada: estrategia, disciplina y mentalidad. En Slange, transformamos el aprendizaje en <span class="font-bold">resultados duraderos</span>.
+                        </p>
+                    </div>
+                    
+                    <div class="card p-4 flex flex-col items-center text-center" style="border-top: 4px solid var(--color-accent-blue);">
+                        <p class="text-4xl mb-2" style="color: var(--color-accent-blue);">🔭</p>
+                        <h3 class="text-xl font-bold mb-2">Nuestra Visión</h3>
+                        <p class="text-sm text-gray-300">
+                            Ser la academia líder global, construyendo la <span class="font-bold">comunidad más sólida</span> de traders rentables de Latinoamérica, reconocida por su integridad y enfoque humano.
+                        </p>
+                    </div>
+                </div>
+                 <p class="text-base italic mt-6 text-gray-400">
+                    "Elevando el estándar del trading profesional, una mente disciplinada a la vez."
+                </p>
+            </div>
+        </div>
+
+        <!-- DIAPOSITIVA 5: SOPORTE INTEGRAL PARTE 1 (NUEVA) -->
+<div class="slide slide-dark">
+            <div class="max-w-5xl mx-auto flex flex-col items-center justify-center h-full">
+                <h2 class="text-3xl md:text-5xl font-bold mb-8 text-center">
+                    Soporte Integral para tu Evolución
+                </h2>
+                <!-- Primeros 3 cuadros - Se agrega w-full y mx-auto para centrar mejor -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 w-full md:max-w-4xl mx-auto">
+                    
+                    <div class="card border-l-4" style="border-color: var(--color-accent-blue);">
+                        <p class="text-2xl mb-1" style="color: var(--color-accent-blue);">🔴</p>
+                        <h3 class="text-lg font-bold">Educación en Vivo</h3>
+                        <p class="text-gray-400 text-xs">Sesiones en tiempo real para un aprendizaje interactivo y directo.</p>
+                    </div>
+                    
+                    <div class="card border-l-4" style="border-color: var(--color-accent-blue);">
+                        <p class="text-2xl mb-1" style="color: var(--color-accent-blue);">📚</p>
+                        <h3 class="text-lg font-bold">Material de Educativo</h3>
+                        <p class="text-gray-400 text-xs">Acceso a clases en vivo y guías para consolidar tu conocimiento.</p>
+                    </div>
+                    
+                    <div class="card border-l-4" style="border-color: var(--color-accent-blue);">
+                        <p class="text-2xl mb-1" style="color: var(--color-accent-blue);">👥</p>
+                        <h3 class="text-lg font-bold">Comunidad de Apoyo</h3>
+                        <p class="text-gray-400 text-xs">Chat privado y apoyo constante: "Piensa como trader, actúa como Slange."</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- DIAPOSITIVA 6: SOPORTE INTEGRAL PARTE 2 (NUEVA) -->
+<div class="slide slide-dark">
+            <div class="max-w-5xl mx-auto flex flex-col items-center justify-center h-full">
+                <h2 class="text-3xl md:text-5xl font-bold mb-8 text-center">
+                    Apoyo y Consistencia
+                </h2>
+                <!-- Últimos 3 cuadros - Se agrega w-full y mx-auto para centrar mejor -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 w-full md:max-w-4xl mx-auto">
+                    <div class="card border-l-4" style="border-color: var(--color-accent-neon);">
+                        <p class="text-2xl mb-1" style="color: var(--color-accent-neon);">🔍</p>
+                        <h3 class="text-lg font-bold">Seguimiento Real</h3>
+                        <p class="text-gray-400 text-xs">Acompañamiento personalizado en tus análisis y operaciones reales.</p>
+                    </div>
+                    
+                    <div class="card border-l-4" style="border-color: var(--color-accent-neon);">
+                        <p class="text-2xl mb-1" style="color: var(--color-accent-neon);">⚡</p>
+                        <h3 class="text-lg font-bold">Señales de Apoyo</h3>
+                        <p class="text-gray-400 text-xs">Señales de apoyo analizadas por expertos. Genera ingresos mientras aprendes.</p>
+                    </div>
+                    
+                    <div class="card border-l-4" style="border-color: var(--color-accent-neon);">
+                        <p class="text-2xl mb-1" style="color: var(--color-accent-neon);">🎯</p>
+                        <h3 class="text-lg font-bold">Estrategias Consistentes</h3>
+                        <p class="text-gray-400 text-xs">Metodologías de alta precisión en tu aprendizaje para rentabilidad sostenible.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- DIAPOSITIVA 7: FILOSOFÍA SLANGE (Corregido de 5 a 7) -->
+<div class="slide slide-dark text-white"> 
+            <div class="max-w-5xl mx-auto flex flex-col items-center justify-center h-full text-center">
+                <h2 class="text-3xl md:text-5xl font-extrabold mb-4">
+                    LA FILOSOFÍA SLANGE: EVOLUCIÓN
+                </h2>
+                <h3 class="text-xl font-light mb-8 text-gradient font-bold">
+                    No seguimos el mercado. Lo entendemos para dominarlo.
+                </h3>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-left w-full md:max-w-3xl mx-auto">
+                    <div class="card p-4 rounded-lg border-2 border-gray-700 backdrop-blur-sm"> 
+                        <p class="text-4xl mb-2" style="color: var(--color-accent-neon);">🧠</p>
+                        <h4 class="text-xl font-bold mb-2">Conocimiento, no Suerte</h4>
+                        <p class="text-sm text-gray-300">En el trading no gana el más rápido, sino el que ataca con <span class="font-bold">precisión</span>. Enfocamos en control mental y técnico.</p>
+                    </div>
+                    <div class="card p-4 rounded-lg border-2 border-gray-700 backdrop-blur-sm"> 
+                        <p class="text-4xl mb-2" style="color: var(--color-accent-red);">🚨</p>
+                        <h4 class="text-xl font-bold mb-2">Dominio del Riesgo</h4>
+                        <p class="text-sm text-gray-300">La libertad no está en escapar del riesgo, sino en entenderlo. Te enseñamos a convertir el riesgo calculado en poder operativo.</p>
+                    </div>
+                </div>
+                
+                <p class="text-xl font-extrabold mt-6 text-gradient border-t pt-4" style="border-color: var(--color-accent-neon);">
+                    “Slange no te promete un camino fácil. Te enseña a dominar el difícil.”
+                </p>
+            </div>
+        </div>
+
+        <!-- DIAPOSITIVA 8 (Corregido de 6 a 8 - PARTE 1 de Membresía) -->
+<div class="slide slide-dark text-center">
+            <div class="max-w-4xl mx-auto flex flex-col items-center justify-center h-full">
+                <h2 class="text-3xl md:text-5xl font-extrabold mb-6 text-white">
+                    Rompe el Ciclo.
+                </h2>
+                
+                <!-- El contenedor principal del listado tiene mx-auto para asegurar el centrado -->
+                <div class="card p-6 rounded-xl shadow-xl w-full md:max-w-2xl mx-auto" style="background-color: rgba(75, 0, 130, 0.85); border-top: 6px solid var(--color-accent-neon); backdrop-filter: blur(5px);">
+                    <h3 class="text-xl font-bold mb-4 text-white">
+                        Tu Membresía a la comunidad incluye:
+                    </h3>
+                    <ul class="text-lg text-left space-y-3 text-gray-200">
+                        <li class="flex items-start">
+                            <span class="text-2xl mr-2 mt-[-3px]" style="color: var(--color-accent-neon);">✓</span>
+                            Acceso Ilimitado durante tu estadia al Programa Educativo Integral.
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-2xl mr-2 mt-[-3px]" style="color: var(--color-accent-neon);">✓</span>
+                            Sesiones de Trading en Vivo con nuestros Expertos.
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-2xl mr-2 mt-[-3px]" style="color: var(--color-accent-neon);">✓</span>
+                            Señales de apoyo (Útiles para comenzar a generar mientras aprendes).
+                        </li>
+                    </ul>
+                </div>
+                
+                <p class="text-xl font-extrabold mt-6 text-white">
+                    <span class="text-gradient">ESTRATEGIA, MENTALIDAD, DOMINIO.</span>
+                </p>
+            </div>
+        </div>
+        
+        <!-- DIAPOSITIVA 9 (Corregido de 7 a 9 - PARTE 2 de Membresía) -->
+<div class="slide slide-dark text-center">
+            <div class="max-w-4xl mx-auto flex flex-col items-center justify-center h-full">
+                <h2 class="text-3xl md:text-5xl font-extrabold mb-6 text-white">
+                    Sé Parte de Slange.
+                </h2>
+                
+                <!-- El contenedor principal del listado tiene mx-auto para asegurar el centrado -->
+                <div class="card p-6 rounded-xl shadow-xl w-full md:max-w-2xl mx-auto" style="background-color: rgba(75, 0, 130, 0.85); border-top: 6px solid var(--color-accent-neon); backdrop-filter: blur(5px);">
+                    <h3 class="text-xl font-bold mb-4 text-white">
+                        Tu Membresía a la comunidad incluye:
+                    </h3>
+                    <ul class="text-lg text-left space-y-3 text-gray-200">
+                        <li class="flex items-start">
+                            <span class="text-2xl mr-2 mt-[-3px]" style="color: var(--color-accent-neon);">✓</span>
+                            Comunidad Privada (Guía, Cercana, sin Filtros).
+                        </li>
+                         <li class="flex items-start">
+                            <span class="text-2xl mr-2 mt-[-3px]" style="color: var(--color-accent-neon);">✓</span>
+                            Acompañamiento personalizado en tu proceso y resolución de dudas.
+                        </li>
+                         <li class="flex items-start">
+                            <span class="text-2xl mr-2 mt-[-3px]" style="color: var(--color-accent-neon);">✓</span>
+                            Sesiones de mentalidad y psicotrading.
+                        </li>
+                    </ul>
+                </div>
+                
+                <p class="text-xl font-extrabold mt-6 text-white">
+                    <span class="text-gradient">APRENDE, APLICA, GANA.</span>
+                </p>
+            </div>
+        </div>
+
+        <!-- DIAPOSITIVA 10: CIERRE (Con Efecto de Escritura) -->
+<div class="slide slide-dark text-center" id="slide-10">
+            <div class="max-w-4xl mx-auto flex flex-col items-center justify-center h-full">
+                
+                <!-- Logotipo con nueva clase de interacción -->
+                <img 
+                    src="https://i.imgur.com/HcI3LE1.png" 
+                    alt="Logotipo Slange Trading - Serpiente sobre ST" 
+                    class="w-24 h-24 md:w-32 md:h-32 mx-auto mb-6 object-contain logo-interact"
+                    style="filter: drop-shadow(0 0 15px rgba(0, 255, 153, 0.5));"
+                >
+                
+                <!-- Título con efecto de escritura -->
+                <h2 class="text-4xl md:text-6xl font-extrabold mb-4 text-white whitespace-nowrap">
+                    <!-- Se agrega 'typing-line' y 'id' para animar -->
+                    <span id="title-typing" class="typing-line">¡Actúa con Precisión!</span>
+                </h2>
+                
+                <!-- Párrafo con efecto de escritura - Se usa un div para centrar el span -->
+                <div class="text-lg font-light mb-8 text-gray-300 w-full flex justify-center">
+                    <!-- Se agrega 'typing-line' y 'id' para animar -->
+                    <span id="text-typing" class="typing-line text-gray-300 text-center mx-auto">
+                        La libertad no se compra, se conquista con estrategia. Toma el control.
+                    </span>
+                </div>
+                
+                <div class="flex flex-col md:flex-row justify-center gap-4 mb-6 w-full px-4">
+                    <!-- Botón "ÚNETE Y COMIENZA A DOMINAR" con estilo de BORDE NEÓN (Clase .btn-neon actualizada) -->
+                    <a href="#" class="btn-neon text-lg w-full md:w-auto shadow-lg py-3">
+                        ÚNETE Y COMIENZA A DOMINAR →
+                    </a>
+                    <!-- Botón "Agenda tu Plan de Acción" (Clase .btn-action-border, usa borde azul) -->
+                    <a href="#" class="btn-action-border px-8 py-3 font-bold text-lg rounded-full shadow-xl w-full md:w-auto">
+                        Agenda tu Plan de Acción
+                    </a>
+                </div>
+                
+                <!-- Badge "Control y Evolución" con el efecto de movimiento (animated-move).
+                     Se le ha quitado el destello de barrido y ahora tiene un hover similar a los cards. -->
+                <a href="#" class="mt-4 font-semibold rounded-full mx-auto w-fit badge-neon animated-move">
+                    Control y Evolución.
+                </a>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- BOTONES DE NAVEGACIÓN (Flechas sutiles - SOLO MÓVIL) -->
+    <button id="prev-btn-mobile" class="nav-btn-mobile md:hidden">
+        ←
+    </button>
+    <button id="next-btn-mobile" class="nav-btn-mobile md:hidden">
+        →
+    </button>
+</body>
+</html>

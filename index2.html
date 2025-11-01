@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Slange Trading - Academia de Dominio Financiero</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'slange-dark': '#01010A',
+                        'slange-deep': '#4B0082', 
+                        'slange-blue': '#0077FF', 
+                        'slange-neon': '#00FF99', 
+                    },
+                    fontFamily: {
+                        'heading': ['Orbitron', 'sans-serif'],
+                        'body': ['Roboto', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        /* Estilos Base y Variables */
+        :root {
+            --color-dark: #01010A;
+            --color-deep: #4B0082;
+            --color-blue: #0077FF;
+            --color-neon: #00FF99;
+            --color-text: #E5E7EB;
+        }
+        body {
+            font-family: var(--font-body);
+            background-color: var(--color-dark);
+            color: var(--color-text);
+            scroll-behavior: smooth;
+        }
+
+        /* Degradado de Texto */
+        .text-neon-gradient {
+            background-image: linear-gradient(to right, var(--color-blue), var(--color-neon));
+            -webkit-background-clip: text;
+            color: transparent;
+        }
+
+        /* Botón de Alto Impacto (Neon) */
+        .btn-cta {
+            font-family: var(--font-heading);
+            background-color: var(--color-neon);
+            color: var(--color-dark);
+            font-weight: 900;
+            padding: 1rem 3rem;
+            border-radius: 9999px;
+            box-shadow: 0 0 20px var(--color-neon);
+            transition: all 0.3s ease-in-out;
+            border: 2px solid var(--color-neon);
+            transform: scale(1.05); /* Ligeramente más grande para impacto */
+        }
+        .btn-cta:hover {
+            box-shadow: 0 0 30px var(--color-neon), 0 0 5px rgba(0, 0, 0, 0.5);
+            transform: scale(1.08); 
+            background-color: var(--color-text); /* Efecto de luz */
+        }
+        
+        /* Estilo de Tarjetas de Beneficios */
+        .benefit-card {
+            background-color: rgba(75, 0, 130, 0.5); /* slange-deep con opacidad */
+            backdrop-filter: blur(5px);
+            border: 1px solid var(--color-deep);
+            transition: transform 0.3s, border-color 0.3s;
+            border-left: 5px solid var(--color-neon);
+        }
+        .benefit-card:hover {
+            transform: translateY(-5px);
+            border-left: 5px solid var(--color-blue);
+        }
+        
+        /* Efecto Visual: Líneas de Neón */
+        .neon-divider {
+            height: 3px;
+            width: 80px;
+            margin: 1.5rem auto;
+            background-image: linear-gradient(to right, transparent, var(--color-neon), transparent);
+            filter: drop-shadow(0 0 5px var(--color-neon));
+        }
+
+        /* Fondo del Héroe (Simulando el video estático) */
+        .hero-background {
+            background-image: url('https://i.imgur.com/R0z0Cd8.mp4'); /* Usamos el video como referencia, pero lo simulamos como fondo oscuro */
+            background-color: var(--color-dark);
+            background-size: cover;
+            background-position: center;
+            position: relative;
+        }
+        .hero-background::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.85); /* Oscurecer más para que el texto resalte */
+            z-index: 0;
+        }
+        
+        /* Secciones con Patrón (Para diferenciación) */
+        .pattern-section {
+            background-color: var(--color-dark);
+            background-image: radial-gradient(var(--color-deep) 1px, transparent 1px);
+            background-size: 30px 30px;
+        }
+        
+        /* Mejorar la responsividad del contenedor principal */
+        .container {
+            max-width: 1400px;
+        }
+
+    </style>
+</head>
+<body class="font-body">
+
+    <header class="fixed top-0 left-0 right-0 z-50 bg-slange-dark bg-opacity-90 backdrop-blur-sm border-b border-slange-deep py-4">
+        <div class="container mx-auto px-6 flex justify-between items-center">
+            <h1 class="text-xl md:text-2xl font-heading font-bold text-white">
+                <span class="text-slange-neon">SLANGE</span> TRADING
+            </h1>
+            <a href="https://www.youtube.com/playlist?list=PLfx7gzF9PEsz0q3pbTprtQktO12DNBaZH" class="btn-cta py-2 px-4 text-sm font-body">¡Empieza Hoy!</a>
+        </div>
+    </header>
+
+    <section id="hero" class="hero-background min-h-screen flex items-center pt-20">
+        <div class="container mx-auto px-6 py-12 text-center relative z-10">
+            <p class="text-slange-neon text-lg md:text-xl font-heading mb-4 animate-pulse">ACADEMIA DE TRADING DE ALTA PRECISIÓN</p>
+            <h2 class="text-5xl md:text-8xl font-heading font-black leading-tight mb-6">
+                <span class="text-white">DOMINA EL MERCADO,</span> <br>
+                <span class="text-neon-gradient">CREA TU LIBERTAD.</span>
+            </h2>
+            <p class="text-xl md:text-3xl text-gray-300 max-w-4xl mx-auto mb-10 font-light">
+                De novato a trader consistente en 90 días. Te enseñamos la <span class="font-bold text-slange-neon">estrategia, psicología y disciplina</span> que el 95% ignora.
+            </p>
+            <a href="https://chat.whatsapp.com/LPITYwN5lEt491RIfSkMtq?mode=wwt" class="btn-cta text-xl md:text-2xl">
+                RESERVA TU SESIÓN GRATUITA →
+            </a>
+            <p class="mt-4 text-sm text-gray-500 font-body">Solo quedan 7 cupos este mes.</p>
+        </div>
+    </section>
+
+    <section id="problema" class="py-20 pattern-section">
+        <div class="container mx-auto px-6 text-center">
+            <h3 class="text-3xl md:text-5xl font-heading font-bold mb-12">
+                ¿Estás Cansado de...?
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+                
+                <div class="bg-slange-dark p-6 rounded-lg shadow-2xl border-t-4 border-slange-blue">
+                    <p class="text-6xl mb-4 text-slange-blue">❌</p>
+                    <h4 class="text-xl font-heading font-bold mb-2">Señales Falsas</h4>
+                    <p class="text-gray-400">Depender de terceros que te prometen ganancias sin educarte realmente.</p>
+                </div>
+                
+                <div class="bg-slange-dark p-6 rounded-lg shadow-2xl border-t-4 border-slange-blue">
+                    <p class="text-6xl mb-4 text-slange-blue">📉</p>
+                    <h4 class="text-xl font-heading font-bold mb-2">Pérdida de Capital</h4>
+                    <p class="text-gray-400">Operar sin un plan sólido, dejando que las emociones dominen tu riesgo.</p>
+                </div>
+
+                <div class="bg-slange-dark p-6 rounded-lg shadow-2xl border-t-4 border-slange-blue">
+                    <p class="text-6xl mb-4 text-slange-blue">🤯</p>
+                    <h4 class="text-xl font-heading font-bold mb-2">Información Vaga</h4>
+                    <p class="text-gray-400">Cursos genéricos que no te dan el paso a paso preciso para la rentabilidad.</p>
+                </div>
+            </div>
+            <div class="neon-divider"></div>
+        </div>
+    </section>
+
+    <section id="beneficios" class="py-20 bg-slange-dark">
+        <div class="container mx-auto px-6">
+            <h3 class="text-4xl md:text-6xl font-heading font-bold text-center mb-4">
+                Lo Que <span class="text-slange-neon">Te Ofrecemos</span>
+            </h3>
+            <p class="text-xl text-center text-gray-400 max-w-3xl mx-auto mb-12">
+                Nuestra promesa: De la teoría a la <span class="text-slange-blue font-bold">rentabilidad consistente</span>, con acompañamiento real.
+            </p>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-6xl mx-auto text-left">
+                
+                <div class="benefit-card p-6 rounded-lg shadow-xl">
+                    <h4 class="text-3xl font-heading font-bold mb-2 text-slange-neon">01. Método Smart Money</h4>
+                    <p class="text-gray-300 text-lg">Aprende a leer el mercado como las instituciones. Nuestras **estrategias de alta precisión** están diseñadas para identificar movimientos clave y operar con confianza.</p>
+                </div>
+
+                <div class="benefit-card p-6 rounded-lg shadow-xl">
+                    <h4 class="text-3xl font-heading font-bold mb-2 text-slange-neon">02. Psicología y Control</h4>
+                    <p class="text-gray-300 text-lg">El 80% del trading es mental. Nuestras sesiones de **psicotrading** te dan el control emocional para seguir tu plan sin caer en la avaricia o el miedo.</p>
+                </div>
+
+                <div class="benefit-card p-6 rounded-lg shadow-xl">
+                    <h4 class="text-3xl font-heading font-bold mb-2 text-slange-neon">03. Trading en Vivo Real</h4>
+                    <p class="text-gray-300 text-lg">No solo teoría. Opere junto a nuestros expertos en **sesiones en vivo** diarias. Vea cómo se aplican las estrategias en tiempo real y aprenda haciendo.</p>
+                </div>
+
+                <div class="benefit-card p-6 rounded-lg shadow-xl">
+                    <h4 class="text-3xl font-heading font-bold mb-2 text-slange-neon">04. Plan de Trading Personalizado</h4>
+                    <p class="text-gray-300 text-lg">Te ayudamos a crear un **Plan de Trading individualizado** basado en tu perfil de riesgo y metas financieras. La rentabilidad requiere estructura.</p>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <section id="contacto" class="py-20 pattern-section">
+        <div class="container mx-auto px-6 text-center max-w-4xl">
+            <h3 class="text-4xl md:text-6xl font-heading font-bold text-white mb-8">
+                TU PRÓXIMO NIVEL <span class="text-slange-blue">COMIENZA AQUÍ.</span>
+            </h3>
+            <blockquote class="bg-slange-deep bg-opacity-70 p-8 md:p-10 rounded-xl shadow-2xl border-l-8 border-slange-neon mb-10">
+                <p class="text-xl md:text-2xl italic text-gray-200 font-body">
+                    "La diferencia entre un novato y un profesional no es la suerte, sino la <span class="font-bold text-slange-neon">disciplina implacable</span> y el acceso a una metodología probada."
+                </p>
+                <footer class="mt-4 text-lg font-heading font-bold text-slange-blue">— El Equipo Fundador de Slange Trading</footer>
+            </blockquote>
+            
+            <a href="https://chat.whatsapp.com/LPITYwN5lEt491RIfSkMtq?mode=wwt" target="_blank" class="btn-cta text-2xl md:text-3xl">
+                Únete a la Comunidad Slange Hoy Mismo
+            </a>
+            <p class="mt-4 text-sm text-gray-500 font-body">Garantía de enfoque y seguimiento personalizado.</p>
+        </div>
+    </section>
+
+    <footer class="bg-slange-dark py-6 border-t border-slange-deep">
+        <div class="container mx-auto px-6 text-center text-sm text-gray-500 font-body">
+            <p>© 2025 Slange Trading. Todos los derechos reservados. | Estrategia, Mentalidad, Dominio.</p>
+            <div class="mt-2 space-x-4">
+                <a href="#" class="hover:text-slange-neon transition duration-300">Términos</a>
+                <a href="#" class="hover:text-slange-neon transition duration-300">Privacidad</a>
+            </div>
+        </div>
+    </footer>
+
+</body>
+</html>

@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Slange Trading - Test Integral</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+        
+        :root {
+            --bg-top: #0B0F14;
+            --bg-mid: #0E1621;
+            --bg-bot: #111A26;
+            --card-bg: #16212E; 
+            --field-bg: #1A2633; 
+            --border-muted: #273445; 
+            --accent: #3B82F6;
+        }
+
+        body {
+            background: linear-gradient(180deg, var(--bg-top) 0%, var(--bg-mid) 50%, var(--bg-bot) 100%);
+            color: #E2E8F0;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            min-height: 100vh;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .glass-panel {
+            background: rgba(22, 33, 46, 0.9);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border-muted);
+        }
+
+        .input-field {
+            background: var(--field-bg);
+            border: 1px solid var(--border-muted);
+            color: white;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            width: 100%;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .input-field:focus { border-color: var(--accent); }
+
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+            font-weight: 700;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px -5px rgba(59, 130, 246, 0.4);
+        }
+
+        .option-btn {
+            width: 100%;
+            padding: 1rem;
+            text-align: left;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 0.75rem;
+            transition: all 0.2s;
+            font-size: 0.9rem;
+        }
+
+        .option-btn:hover {
+            background: rgba(59, 130, 246, 0.1);
+            border-color: rgba(59, 130, 246, 0.4);
+            transform: translateX(4px);
+        }
+
+        .progress-bar {
+            height: 4px;
+            background: var(--accent);
+            transition: width 0.4s ease;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-in { animation: fadeInUp 0.5s ease-out forwards; }
+    </style>
+</head>
+<body>
+
+    <!-- Hidden Admin Trigger -->
+    <button onclick="showAuthModal()" class="fixed top-4 right-4 z-50 w-12 h-12 opacity-0 hover:opacity-10 transition-opacity bg-white rounded-full"></button>
+
+    <div class="w-full max-w-2xl px-6 py-12 flex flex-col items-center">
+        
+        <img src="https://i.imgur.com/puuqyXz.png" alt="Slange Trading" class="max-w-[160px] mb-10 animate-in">
+
+        <!-- STEP 1: WELCOME -->
+        <div id="step-1" class="w-full glass-panel p-8 md:p-10 rounded-[2rem] animate-in">
+            <div class="mb-8 text-center">
+                <span class="text-blue-500 text-[10px] font-bold uppercase tracking-[0.3em] block mb-3">Evaluación de Conocimientos</span>
+                <h1 class="text-3xl font-extrabold text-white mb-4 leading-tight">Test Integral Slange Trading</h1>
+                <div class="bg-blue-500/10 border border-blue-500/20 rounded-xl p-4 mb-6">
+                    <p class="text-blue-200 text-sm leading-relaxed text-left">
+                        <strong>Nota importante:</strong> Por favor, responde con <strong>total honestidad</strong>. Tu sinceridad nos permitirá evaluar correctamente tu nivel actual y establecer un plan de trabajo adecuado.
+                    </p>
+                </div>
+            </div>
+
+            <div class="space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="text-[10px] uppercase font-bold text-gray-500 ml-1 mb-2 block tracking-widest">Nombre Completo</label>
+                        <input type="text" id="reg-name" class="input-field" placeholder="Tu nombre">
+                    </div>
+                    <div>
+                        <label class="text-[10px] uppercase font-bold text-gray-500 ml-1 mb-2 block tracking-widest">Edad</label>
+                        <input type="number" id="reg-age" class="input-field" placeholder="Años">
+                    </div>
+                </div>
+                <div>
+                    <label class="text-[10px] uppercase font-bold text-gray-500 ml-1 mb-2 block tracking-widest">Fecha de Evaluación</label>
+                    <input type="date" id="reg-date" class="input-field">
+                </div>
+                <button onclick="startQuiz()" class="btn-primary w-full mt-4">Comenzar Test (117 Preguntas)</button>
+            </div>
+        </div>
+
+        <!-- STEP 2: QUIZ -->
+        <div id="step-quiz" class="hidden w-full glass-panel overflow-hidden rounded-[2rem] animate-in">
+            <div class="w-full bg-white/5 h-1">
+                <div id="progress-indicator" class="progress-bar" style="width: 0%"></div>
+            </div>
+            <div class="p-8 md:p-10">
+                <div class="mb-8 flex justify-between items-end border-b border-white/5 pb-6">
+                    <div class="flex-1">
+                        <p id="q-category" class="text-blue-500 text-[10px] font-bold uppercase tracking-widest mb-2"></p>
+                        <h2 id="q-title" class="text-xl font-bold text-white leading-tight"></h2>
+                    </div>
+                    <span id="q-progress" class="text-[11px] font-mono text-gray-500 ml-4 whitespace-nowrap"></span>
+                </div>
+                <div id="options-container" class="space-y-3"></div>
+            </div>
+        </div>
+
+        <!-- STEP 3: THANKS -->
+        <div id="step-thanks" class="hidden w-full glass-panel p-10 rounded-[2rem] text-center animate-in">
+            <div class="w-20 h-20 bg-blue-500/10 text-blue-500 rounded-3xl flex items-center justify-center mx-auto mb-8 border border-blue-500/20">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+            </div>
+            <h2 class="text-2xl font-extrabold text-white mb-2 uppercase tracking-tight">¡GRACIAS POR TU HONESTIDAD!</h2>
+            <div class="h-px w-12 bg-blue-500 mx-auto mb-6"></div>
+            <p class="text-gray-300 text-lg italic font-light mb-8 leading-relaxed px-4">
+                "El primer paso hacia el éxito es reconocer dónde estamos hoy, para poder construir el camino hacia donde queremos llegar mañana. Juntos haremos que este proceso sea extraordinario."
+            </p>
+            <p class="text-gray-500 text-[10px] uppercase tracking-widest mb-8">Tus respuestas han sido guardadas automáticamente.</p>
+            <button onclick="location.reload()" class="btn-primary w-full max-w-xs mx-auto">Finalizar Proceso</button>
+        </div>
+    </div>
+
+    <!-- Admin Modals (Auth & List) -->
+    <div id="auth-modal" class="hidden fixed inset-0 z-[100] bg-black/90 flex items-center justify-center p-6 text-center">
+        <div class="w-full max-w-xs glass-panel p-8 rounded-2xl">
+            <h3 class="text-white font-bold mb-6 uppercase text-[10px] tracking-widest">Acceso Admin</h3>
+            <input type="password" id="admin-pass" class="input-field text-center mb-4" placeholder="Password">
+            <button onclick="loginAdmin()" class="btn-primary w-full text-xs py-3">Entrar</button>
+            <button onclick="hideAuthModal()" class="w-full mt-4 text-gray-500 text-[10px] font-bold uppercase">Cerrar</button>
+        </div>
+    </div>
+
+    <div id="admin-panel" class="hidden fixed inset-0 z-[110] bg-[#0B0F14] overflow-y-auto p-4 md:p-8">
+        <div class="max-w-5xl mx-auto">
+            <div class="flex justify-between items-center mb-10 border-b border-white/5 pb-8">
+                <div>
+                    <h2 class="text-3xl font-black text-white italic tracking-tighter uppercase">Slange Admin</h2>
+                    <p class="text-gray-500 text-[10px] uppercase font-bold tracking-widest mt-1">Registros de Alumnos</p>
+                </div>
+                <button onclick="closeAdmin()" class="bg-white/5 p-3 rounded-full hover:bg-white/10 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+            </div>
+            <div id="admin-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+        </div>
+    </div>
+
+    <div id="detail-modal" class="hidden fixed inset-0 z-[120] bg-black/95 flex items-center justify-center p-4">
+        <div class="w-full max-w-3xl bg-[#16212E] rounded-3xl border border-[#273445] max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
+            <div class="p-8 border-b border-white/5 flex justify-between items-start bg-[#1A2633]">
+                <div>
+                    <h3 id="det-name" class="text-2xl font-bold text-white mb-1"></h3>
+                    <p id="det-meta" class="text-xs text-blue-400 font-bold uppercase tracking-wider"></p>
+                </div>
+                <button onclick="closeDetail()" class="text-gray-500 hover:text-white transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+            </div>
+            <div id="det-content" class="p-8 overflow-y-auto space-y-8 bg-[#0B0F14]"></div>
+        </div>
+    </div>
+
+    <script>
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'slange-full-v1';
+        let db, auth, currentUser = null, currentQ = 0;
+        let quizData = { name: '', age: '', evaluationDate: '', answers: [] };
+
+        document.getElementById('reg-date').valueAsDate = new Date();
+
+        const questions = [
+            // PERFIL
+            { cat: "Perfil", q: "¿Cuál es tu experiencia real en el trading?", options: ["a) Nulo ( voy desde cero)", "b) Básico (Soportes / resistencias)", "c) Intermedio (metodologia y estrategias)", "d) Avanzado ( consistente pero no rentable)"] },
+            { cat: "Perfil", q: "Operas en cuenta:", options: ["a) Real", "b) Demo", "c) fondeo"] },
+            { cat: "Perfil", q: "¿Buscas capital propio o fondeo?", options: ["a) Real", "b) Fondeo", "c) Ambas", "d) No lo tengo claro"] },
+            { cat: "Perfil", q: "¿Cómo reaccionas ante una perdida del 2% de tu capital?", type: "corta" },
+            { cat: "Perfil", q: "¿Cuánto tiempo planeas dedicarle a tu formación real?", options: ["a) 1 – 2 Horas diarias", "b) 3 – 5 Horas diarias", "c) Tiempo completo", "d) Fines de semana"] },
+            { cat: "Perfil", q: "¿Cuál es tu meta principal en 6 y 12 meses?", type: "corta" },
+
+            // BLOQUE 1
+            { cat: "Bloque 1: Fundamentos", q: "1. ¿Qué es el trading?", options: ["a) Comprar activos para mantenerlos muchos años", "b) Comprar y vender activos buscando beneficio en movimientos de precio", "c) Invertir en empresas con dividendos", "d) Apostar al azar en el mercado"] },
+            { cat: "Bloque 1: Fundamentos", q: "2. ¿Qué representa una vela japonesa en un gráfico?", options: ["a) Solo el precio de cierre", "b) La volatilidad del mercado", "c) Apertura, cierre, máximo y mínimo de un periodo", "d) El volumen total"] },
+            { cat: "Bloque 1: Fundamentos", q: "3. ¿Qué es el spread?", options: ["a) Diferencia entre precio de compra y venta", "b) Comisión mensual del broker", "c) Movimiento mínimo del precio", "d) Cantidad de lotes operados"] },
+            { cat: "Bloque 1: Fundamentos", q: "4. ¿Qué es Bid y Ask?", options: ["a) Son los niveles donde el mercado siempre rebota en el Bid cuando hay mucha liquidez y en el Ask cuando no hay liquidez", "b) Son indicadores técnicos que muestran la fuerza de compradores y vendedores.", "c) Son los dos precios del mercado: Bid es el precio al que el mercado compra y Ask es el precio al que el mercado vende.", "d) Son los precios máximos y mínimos que el mercado puede alcanzar en una sesión."] },
+            { cat: "Bloque 1: Fundamentos", q: "5. ¿Qué es el Lotaje?", options: ["a) Diferencia entre precio de compra y venta", "b) El periodo de tiempo del gráfico", "c) El margen que retira el bróker", "d) El volumen o tamaño de una operación"] },
+            { cat: "Bloque 1: Fundamentos", q: "6. ¿Para qué nos sirve el apalancamiento?", options: ["a) Para aumentar el tamaño de una posición en el mercado utilizando menos capital propio.", "b) Para reducir automáticamente el riesgo de cada operación sin importar el tamaño de la posición.", "c) Para garantizar que una operación sea ganadora cuando el análisis es correcto.", "d) Para evitar que el mercado se mueva en contra de nuestra operación."] },
+            { cat: "Bloque 1: Fundamentos", q: "7. ¿Qué significa que un mercado esté en tendencia alcista?", options: ["a) Hace máximos y mínimos cada vez más bajos", "b) Hace máximos y mínimos cada vez más altos", "c) El precio no se mueve", "d) Tiene alta volatilidad"] },
+            { cat: "Bloque 1: Fundamentos", q: "8. ¿Qué es el timeframe?", options: ["a) El activo que se opera", "b) El periodo de tiempo del gráfico", "c) El tipo de broker", "d) El volumen del mercado"] },
+            { cat: "Bloque 1: Fundamentos", q: "9. ¿Qué es el apalancamiento?", options: ["a) Dinero prestado por el broker para abrir posiciones mayores", "b) Dinero que ganas en el mercado", "c) El margen que retira el broker", "d) El tamaño mínimo de una operación"] },
+
+            // BLOQUE 2
+            { cat: "Bloque 2: Lectura Básica", q: "10. ¿Qué es un soporte?", type: "corta" },
+            { cat: "Bloque 2: Lectura Básica", q: "11. ¿Qué es una resistencia?", type: "corta" },
+            { cat: "Bloque 2: Lectura Básica", q: "12. ¿Qué indica un rechazo fuerte en una zona del gráfico?", options: ["a) Que el precio no puede seguir moviéndose", "b) Que existe interés opuesto en esa zona", "c) Que el mercado cerrará", "d) Que el broker intervino"] },
+            { cat: "Bloque 2: Lectura Básica", q: "13. Si el precio rompe una resistencia fuerte, lo más común es que:", options: ["a) El precio desaparezca", "b) Se genere continuidad alcista o retest", "c) El mercado cierre", "d) No ocurra nada"] },
+            { cat: "Bloque 2: Lectura Básica", q: "14. ¿Qué es una consolidación?", options: ["a) Movimiento fuerte direccional", "b) Movimiento lateral del precio", "c) Ruptura del mercado", "d) Caída del volumen"] },
+            { cat: "Bloque 2: Lectura Básica", q: "15. ¿Qué significa que el mercado pierda estructura alcista?", options: ["a) Hace un nuevo máximo", "b) Rompe un mínimo relevante", "c) Sube rápido", "d) Aparece volumen"] },
+            { cat: "Bloque 2: Lectura Básica", q: "16. ¿Qué indica un cambio de carácter del precio (CoCH)?", type: "corta" },
+            { cat: "Bloque 2: Lectura Básica", q: "17. ¿Cuál es la característica principal que define una tendencia alcista según la Teoría de Dow?", options: ["a) Una sucesión de máximos y mínimos cada vez más altos.", "b) Un incremento constante en el volumen de transacciones.", "c) Que el precio se mantenga por encima de una media móvil de 200 periodos.", "d) Que las velas japonesas sean todas de color verde."] },
+            { cat: "Bloque 2: Lectura Básica", q: "18. En el contexto de soporte y resistencia, ¿qué sucede generalmente cuando un soporte importante es roto con fuerza?", options: ["a) Deja de tener relevancia para el análisis futuro.", "b) El precio debe regresar inmediatamente por encima de él.", "c) Se genera una señal automática de compra.", "d) Se convierte en una zona de resistencia potencial (principio de polaridad)."] },
+            { cat: "Bloque 2: Lectura Básica", q: "19. ¿Qué representa una vela japonesa tipo 'Doji'?", options: ["a) Que el mercado va a entrar en una fase de lateralización larga.", "b) Una señal inequívoca de cambio de tendencia.", "c) Indecisión en el mercado donde la apertura y el cierre son casi iguales.", "d) Una fuerte presión de compra."] },
+            { cat: "Bloque 2: Lectura Básica", q: "20. Si un trader arriesga el 1% de su cuenta por operación y tiene un ratio Riesgo:Beneficio de 1:3, ¿cuántas operaciones debe ganar de cada 10 para mantenerse en equilibrio (breakeven)?", options: ["a) 5 operaciones (un 50% de tasa de acierto).", "b) 7 operaciones (un 70% de tasa de acierto).", "c) 2.5 operaciones (un 25% de tasa de acierto).", "d) 3.3 operaciones (un 33% de tasa de acierto)."] },
+            { cat: "Bloque 2: Lectura Básica", q: "21. ¿Qué indica una 'divergencia regular bajista' entre el precio y un oscilador (como el RSI)?", options: ["a) El oscilador entra en zona de sobrecompra por encima de 70.", "b) El precio hace un máximo más alto pero el oscilador hace un máximo más bajo.", "c) El precio rompe una línea de tendencia alcista.", "d) El precio y el oscilador caen al mismo tiempo con fuerza."] },
+            { cat: "Bloque 2: Lectura Básica", q: "22. ¿Qué es el 'Slippage' en la ejecución de órdenes?", options: ["a) La caída del precio justo después de comprar.", "b) El costo fijo que cobra el broker por abrir una posición.", "c) La diferencia entre el precio solicitado y el precio al que realmente se ejecuta la orden.", "d) Un error informático que borra las órdenes del sistema."] },
+            { cat: "Bloque 2: Lectura Básica", q: "23. ¿A qué se refiere el término 'Liquidez' en un activo financiero?", options: ["a) A la cantidad de dinero total que tiene el trader en su cuenta.", "b) A la facilidad para comprar o vender el activo sin afectar significativamente su precio.", "c) A la velocidad con la que el precio se mueve en un minuto.", "d) Al porcentaje de operaciones ganadoras de un sistema."] },
+            { cat: "Bloque 2: Lectura Básica", q: "24. En el análisis de marcos temporales (Multi-timeframe analysis), ¿cuál es el objetivo de mirar una temporalidad mayor?", options: ["a) Saber qué va a pasar en los próximos 5 minutos.", "b) Evitar tener que usar indicadores técnicos.", "c) Encontrar el punto exacto de entrada al pip.", "d) Identificar la dirección de la tendencia principal y zonas de valor importantes."] },
+            { cat: "Bloque 2: Lectura Básica", q: "25. ¿Qué define a un 'Break of Structure' (BOS) en una tendencia bajista?", options: ["a) Cuando el precio toca una línea de tendencia por tercera vez.", "b) Cuando el precio supera el máximo anterior.", "c) Cuando el RSI cruza el nivel de 50 hacia arriba.", "d) Cuando el precio cierra por debajo del último mínimo válido."] },
+            { cat: "Bloque 2: Lectura Básica", q: "26. ¿Qué es la Fractalidad?", type: "corta" },
+
+            // BLOQUE 3
+            { cat: "Bloque 3: Gestión del Riesgo", q: "27. ¿Qué es un stop loss?", options: ["a) Objetivo de ganancia", "b) Nivel donde se limita la pérdida", "c) Punto de entrada", "d) Comisión del broker"] },
+            { cat: "Bloque 3: Gestión del Riesgo", q: "28. ¿Qué es el riesgo por operación?", options: ["a) Dinero total de la cuenta", "b) Cantidad que se está dispuesto a perder en una operación", "c) Volumen del mercado", "d) Spread del broker"] },
+            { cat: "Bloque 3: Gestión del Riesgo", q: "29. ¿Qué porcentaje de riesgo por operación suele considerarse prudente para un trader principiante?", options: ["a) 10%", "b) 20%", "c) 1% – 2%", "d) 50%"] },
+            { cat: "Bloque 3: Gestión del Riesgo", q: "30. Si un trader arriesga demasiado en cada operación, ¿qué ocurre normalmente?", options: ["a) Se vuelve rentable más rápido", "b) Aumenta la probabilidad de perder la cuenta", "c) El mercado se adapta", "d) El broker lo protege"] },
+            { cat: "Bloque 3: Gestión del Riesgo", q: "31. ¿Qué es la relación riesgo-beneficio (RR)?", type: "corta" },
+            { cat: "Bloque 3: Gestión del Riesgo", q: "32. Si arriesgas 100 dólares para ganar 300, tu RR es:", options: ["a) 1:1", "b) 1:2", "c) 1:3", "d) 3:1"] },
+
+            // BLOQUE 4
+            { cat: "Bloque 4: Psicología", q: "33. ¿Qué es FOMO en trading?", type: "corta" },
+            { cat: "Bloque 4: Psicología", q: "34. ¿Qué suele provocar el FOMO?", options: ["a) Entradas impulsivas", "b) Mejor análisis", "c) Más disciplina", "d) Mejores resultados"] },
+            { cat: "Bloque 4: Psicología", q: "35. ¿Por qué es importante tener un plan de trading?", type: "corta" },
+            { cat: "Bloque 4: Psicología", q: "36. ¿Qué significa sobreoperar (overtrading)?", options: ["a) Operar solo una vez", "b) Operar demasiado sin calidad en las entradas", "c) Operar con bajo riesgo", "d) Operar solo en tendencia"] },
+            { cat: "Bloque 4: Psicología", q: "37. ¿Qué es un diario de trading?", type: "corta" },
+
+            // BLOQUE 5
+            { cat: "Bloque 5: Aplicación", q: "38. Si el mercado está en tendencia alcista, lo más lógico es:", options: ["a) Buscar ventas", "b) Buscar compras en retrocesos", "c) No operar nunca", "d) Esperar que caiga"] },
+            { cat: "Bloque 5: Aplicación", q: "39. Si el mercado está lateral, lo más probable es:", options: ["a) Movimientos erráticos entre zonas", "b) Tendencia fuerte", "c) Movimiento único", "d) Volumen cero"] },
+            { cat: "Bloque 5: Aplicación", q: "40. ¿Cuál de estos es un error común del trader principiante?", options: ["a) Usar stop loss", "b) Arriesgar demasiado", "c) Esperar confirmaciones", "d) Tener plan"] },
+            { cat: "Bloque 5: Aplicación", q: "41. ¿Qué es backtesting?", type: "corta" },
+            { cat: "Bloque 5: Aplicación", q: "42. En una frase corta: ¿Qué crees que es lo más difícil del trading?", type: "abierta" },
+
+            // BLOQUE 6
+            { cat: "Bloque 6: Estructura Intermedia", q: "43. ¿Qué representa un Higher High (HH) en una tendencia alcista?", options: ["a) Un máximo menor que el anterior", "b) Un máximo más alto que el máximo previo", "c) Un mínimo más alto que el anterior", "d) Un máximo igual al anterior"] },
+            { cat: "Bloque 6: Estructura Intermedia", q: "44. ¿Qué representa un Higher Low (HL)?", options: ["a) Un mínimo más bajo que el anterior", "b) Un máximo más bajo que el anterior", "c) Un mínimo más alto que el mínimo anterior", "d) Un máximo más alto que el anterior"] },
+            { cat: "Bloque 6: Estructura Intermedia", q: "45. ¿Qué representa un Lower Low (LL)?", options: ["a) Un mínimo más bajo que el mínimo anterior", "b) Un máximo más alto que el anterior", "c) Un mínimo igual al anterior", "d) Un máximo menor que el anterior"] },
+            { cat: "Bloque 6: Estructura Intermedia", q: "46. ¿Qué significa el concepto de “Bias” en trading?", options: ["a) El tamaño de la posición que utiliza el trader", "b) La dirección o predisposición que se espera del mercado", "c) El spread del mercado", "d) El volumen de operaciones abiertas"] },
+            { cat: "Bloque 6: Estructura Intermedia", q: "47. ¿Qué significa HTF (Higher Time Frame)?", options: ["a) Un gráfico de menor temporalidad", "b) Un marco temporal mayor que se usa para contexto", "c) Un indicador técnico", "d) Un tipo de estrategia automática"] },
+            { cat: "Bloque 6: Estructura Intermedia", q: "48. ¿Cuál es el objetivo principal de analizar el HTF antes de operar?", options: ["a) Encontrar la entrada exacta", "b) Determinar la dirección del contexto general del mercado", "c) Reducir el spread", "d) Evitar usar stop loss"] },
+            { cat: "Bloque 6: Estructura Intermedia", q: "49. ¿Qué significa el concepto “Weak High”?", options: ["a) Un máximo que probablemente será roto porque no provocó un retroceso fuerte", "b) Un máximo formado por una vela grande", "c) Un máximo con alto volumen", "d) Un máximo que nunca será roto"] },
+            { cat: "Bloque 6: Estructura Intermedia", q: "50. ¿Qué significa “Weak Low”?", options: ["a) Un mínimo con volumen alto", "b) Un mínimo que probablemente será tomado por liquidez", "c) Un mínimo muy fuerte", "d) Un mínimo que genera tendencia"] },
+
+            // BLOQUE 7
+            { cat: "Bloque 7: Liquidez", q: "51. ¿Qué es un Liquidity Pool?", options: ["a) Una zona donde hay acumulación de órdenes stop o pendientes", "b) Un indicador técnico", "c) Una zona de bajo volumen", "d) Un tipo de broker"] },
+            { cat: "Bloque 7: Liquidez", q: "52. ¿Dónde suelen encontrarse pools de liquidez?", options: ["a) En zonas aleatorias", "b) Sobre máximos y mínimos importantes", "c) Solo en medias móviles", "d) Dentro de indicadores técnicos"] },
+            { cat: "Bloque 7: Liquidez", q: "53. ¿Qué es un Liquidity Void?", options: ["a) Una zona donde el precio se mueve muy lentamente", "b) Una zona donde el precio se mueve rápidamente por falta de liquidez", "c) Una zona donde el mercado se detiene", "d) Una zona donde no existen velas"] },
+            { cat: "Bloque 7: Liquidez", q: "54. ¿Qué suele ocurrir cuando el mercado entra en un liquidity void?", options: ["a) El precio se mueve con fuerza y rapidez", "b) El mercado se vuelve lateral", "c) El mercado deja de operar", "d) El spread desaparece"] },
+            { cat: "Bloque 7: Liquidez", q: "55. ¿Qué es un “liquidity grab”?", options: ["a) Cuando el mercado toma liquidez antes de moverse en dirección contraria", "b) Cuando el mercado se queda lateral", "c) Cuando el mercado pierde volumen", "d) Cuando el mercado rompe una media móvil"] },
+
+            // BLOQUE 8
+            { cat: "Bloque 8: Cambios Estructura", q: "56. ¿Qué significa BOS (Break of Structure)?", options: ["a) Una ruptura de estructura que confirma continuidad de tendencia", "b) Una ruptura de soporte menor", "c) Un cambio inmediato de tendencia", "d) Un movimiento lateral"] },
+            { cat: "Bloque 8: Cambios Estructura", q: "57. ¿Qué es MSS (Market Structure Shift)?", options: ["a) Una ruptura menor dentro de una tendencia", "b) Un cambio en la estructura del mercado que puede indicar cambio de tendencia", "c) Una consolidación", "d) Un indicador técnico"] },
+            { cat: "Bloque 8: Cambios Estructura", q: "58. ¿Cuál es la diferencia principal entre BOS y MSS?", options: ["a) BOS indica continuidad; MSS indica posible cambio de tendencia", "b) BOS es alcista y MSS bajista", "c) MSS ocurre solo en forex", "d) No existe diferencia"] },
+
+            // BLOQUE 9
+            { cat: "Bloque 9: Ineficiencias", q: "59. ¿Qué es un Fair Value Gap (FVG)?", options: ["a) Un patrón de velas japonesas", "b) Una ineficiencia donde el precio se movió muy rápido dejando un desequilibrio", "c) Un indicador técnico", "d) Un tipo de soporte"] },
+            { cat: "Bloque 9: Ineficiencias", q: "60. ¿Cómo se forma un FVG clásico?", options: ["a) Cuando tres velas consecutivas dejan un espacio entre el máximo de la primera y el mínimo de la tercera", "b) Cuando el precio forma un doble techo", "c) Cuando aparece un doji", "d) Cuando el volumen aumenta"] },
+            { cat: "Bloque 9: Ineficiencias", q: "61. ¿Por qué muchos traders observan los FVG?", options: ["a) Porque el mercado suele regresar a equilibrar esa zona", "b) Porque siempre indican cambio de tendencia", "c) Porque eliminan el riesgo", "d) Porque siempre generan ganancias"] },
+
+            // BLOQUE 10
+            { cat: "Bloque 10: Order Blocks", q: "62. ¿Qué es un Order Block?", options: ["a) Un indicador técnico", "b) Una zona donde instituciones colocaron órdenes significativas antes de un movimiento fuerte", "c) Un soporte clásico", "d) Una media móvil"] },
+            { cat: "Bloque 10: Order Blocks", q: "63. ¿Qué tipo de vela suele definir un Order Block?", options: ["a) La última vela contraria antes de un movimiento impulsivo", "b) Una vela doji", "c) Una vela con mecha grande", "d) Una vela pequeña"] },
+            { cat: "Bloque 10: Order Blocks", q: "64. ¿Cuál es una característica de un Order Block de alta probabilidad?", options: ["a) Provoca ruptura de estructura", "b) Tiene volumen bajo", "c) Aparece en cualquier lugar", "d) Siempre aparece en temporalidad baja"] },
+            { cat: "Bloque 10: Order Blocks", q: "65. ¿Qué aumenta la probabilidad de un Order Block?", options: ["a) Confluencia con liquidez o FVG", "b) Velas pequeñas", "c) Spread bajo", "d) Indicadores"] },
+
+            // BLOQUE 11 & 12
+            { cat: "Bloque 11: Macro", q: "66. ¿Qué es el Carry Trade?", options: ["a) Una estrategia que aprovecha la diferencia de tasas de interés entre dos monedas", "b) Una estrategia de scalping", "c) Una estrategia basada en volumen", "d) Una estrategia de trading automático"] },
+            { cat: "Bloque 11: Macro", q: "67. ¿En qué mercado es más común el carry trade?", options: ["a) Forex", "b) Criptomonedas", "c) Acciones", "d) Materias primas"] },
+            { cat: "Bloque 12: Avanzado", q: "68. ¿Qué significa HTL en análisis técnico?", options: ["a) High Trend Line", "b) Higher Timeframe Level", "c) Horizontal Trading Level", "d) High Trading Liquidity"] },
+            { cat: "Bloque 12: Avanzado", q: "69. ¿Por qué los niveles HTF suelen ser importantes?", options: ["a) Porque concentran liquidez y órdenes institucionales", "b) Porque eliminan el spread", "c) Porque siempre generan rebotes", "d) Porque reducen el volumen"] },
+            { cat: "Bloque 12: Avanzado", q: "70. ¿Qué es un “premium zone” en análisis de precio?", options: ["a) Zona donde el precio está relativamente caro dentro de un rango", "b) Zona donde el precio está barato", "c) Zona de consolidación", "d) Zona sin volumen"] },
+            { cat: "Bloque 12: Avanzado", q: "71. ¿Qué es un “discount zone”?", options: ["a) Zona donde el precio está relativamente barato dentro de un rango", "b) Zona de alto volumen", "c) Zona de ruptura", "d) Zona de liquidez institucional"] },
+
+            // BLOQUE 13 & 14
+            { cat: "Bloque 13: Comprensión", q: "72. ¿Por qué el mercado busca liquidez?", options: ["a) Porque necesita contrapartes para ejecutar órdenes grandes", "b) Porque los indicadores lo indican", "c) Porque el broker lo decide", "d) Porque el mercado siempre vuelve al origen"] },
+            { cat: "Bloque 13: Comprensión", q: "73. ¿Qué suele ocurrir después de que el mercado toma liquidez por encima de un máximo?", options: ["a) Muchas veces se produce una reversión", "b) El mercado se detiene", "c) El mercado cierra", "d) El volumen desaparece"] },
+            { cat: "Bloque 13: Comprensión", q: "74. ¿Qué significa “mitigación” en el contexto de Order Blocks?", options: ["a) Cuando el precio vuelve a una zona para ejecutar órdenes pendientes", "b) Cuando el precio se vuelve lateral", "c) Cuando el volumen desaparece", "d) Cuando el mercado cambia de broker"] },
+            { cat: "Bloque 14: Aplicación", q: "75. Si el HTF es alcista pero el LTF es bajista, ¿qué suele representar esto?", options: ["a) Un retroceso dentro de la tendencia mayor", "b) Un cambio definitivo de tendencia", "c) Un error del gráfico", "d) Un problema del broker"] },
+            { cat: "Bloque 14: Aplicación", q: "76. ¿Qué tipo de zonas suelen buscar los traders institucionales para ejecutar grandes órdenes?", options: ["a) Zonas de liquidez", "b) Indicadores técnicos", "c) Velas doji", "d) Zonas sin volumen"] },
+            { cat: "Bloque 14: Aplicación", q: "77. ¿Qué diferencia a un trader consistente de un trader que solo conoce conceptos técnicos?", type: "corta" },
+
+            // BLOQUE 14 (Continuación) - Indicadores
+            { cat: "Bloque 14: Indicadores", q: "78. ¿Cuál es la función principal de una media móvil (Moving Average)?", options: ["a) Identificar la dirección general de la tendencia del mercado", "b) Determinar el tamaño de la posición", "c) Medir el spread del mercado", "d) Detectar noticias económicas"] },
+            { cat: "Bloque 14: Indicadores", q: "79. ¿Qué diferencia principal existe entre una SMA y una EMA?", options: ["a) La EMA da mayor peso a los precios recientes", "b) La SMA utiliza volumen", "c) La EMA solo funciona en temporalidades altas", "d) La SMA mide volatilidad"] },
+            { cat: "Bloque 14: Indicadores", q: "80. ¿Para qué se utiliza comúnmente una media móvil de 200 periodos?", options: ["a) Identificar la tendencia principal del mercado", "b) Medir el volumen del mercado", "c) Determinar el apalancamiento", "d) Detectar liquidez institucional"] },
+
+            // BLOQUE 15
+            { cat: "Bloque 15: Momentum", q: "81. ¿Qué mide el RSI (Relative Strength Index)?", options: ["a) La fuerza o velocidad del movimiento del precio", "b) El volumen institucional", "c) La liquidez del mercado", "d) El tamaño de la posición"] },
+            { cat: "Bloque 15: Momentum", q: "82. ¿Qué suele indicar un RSI por encima de 70?", options: ["a) Zona de sobrecompra", "b) Zona de sobreventa", "c) Consolidación", "d) Mercado sin volumen"] },
+            { cat: "Bloque 15: Momentum", q: "83. ¿Qué mide principalmente el MACD?", options: ["a) La relación entre dos medias móviles para medir momentum", "b) El volumen del mercado", "c) El spread del mercado", "d) El tamaño de la posición"] },
+
+            // BLOQUE 16
+            { cat: "Bloque 16: Volatilidad y Volumen", q: "84. ¿Qué mide principalmente el ATR (Average True Range)?", options: ["a) La volatilidad promedio del mercado", "b) El volumen total", "c) La dirección de la tendencia", "d) La liquidez institucional"] },
+            { cat: "Bloque 16: Volatilidad y Volumen", q: "85. ¿Qué indican normalmente las Bandas de Bollinger cuando se estrechan?", options: ["a) Baja volatilidad y posible expansión futura del precio", "b) Alta volatilidad inmediata", "c) Cambio de tendencia confirmado", "d) Falta de liquidez"] },
+            { cat: "Bloque 16: Volatilidad y Volumen", q: "86. ¿Qué información proporciona el volumen en un gráfico?", options: ["a) La cantidad de transacciones o actividad del mercado en un periodo", "b) El spread del broker", "c) El tamaño de la cuenta del trader", "d) El apalancamiento disponible"] },
+            { cat: "Bloque 16: Volatilidad y Volumen", q: "87. ¿Por qué el volumen puede ser importante para confirmar movimientos del precio?", options: ["a) Porque un movimiento con volumen fuerte suele tener mayor validez", "b) Porque reduce el spread", "c) Porque elimina el riesgo", "d) Porque reemplaza el análisis técnico"] },
+            { cat: "Bloque 16: Volatilidad y Volumen", q: "88. ¿Qué significa VWAP (Volume Weighted Average Price)?", options: ["a) Precio promedio ponderado por volumen", "b) Volumen total del mercado", "c) Precio promedio simple del mercado", "d) Indicador de liquidez institucional"] },
+            { cat: "Bloque 16: Volatilidad y Volumen", q: "89. ¿Para qué utilizan muchos traders institucionales el VWAP?", options: ["a) Como referencia del precio promedio negociado durante la sesión", "b) Para calcular el spread del mercado", "c) Para determinar noticias económicas", "d) Para calcular el apalancamiento"] },
+            { cat: "Bloque 16: Volatilidad y Volumen", q: "90. ¿Qué es el indicador Ichimoku Cloud?", options: ["a) Un sistema que combina tendencia, momentum y soporte/resistencia en un solo indicador", "b) Un indicador exclusivo de volumen", "c) Una media móvil modificada", "d) Un indicador de noticias económicas"] },
+            { cat: "Bloque 16: Volatilidad y Volumen", q: "91. ¿Qué representa la “nube” (Kumo) en el sistema Ichimoku?", options: ["a) Zonas potenciales de soporte o resistencia dinámicos", "b) Zonas de bajo volumen", "c) Niveles de spread", "d) Cambios de broker"] },
+
+            // BLOQUE 17
+            { cat: "Bloque 17: Herramientas", q: "92. ¿Para qué se utiliza la herramienta Fibonacci en trading?", options: ["a) Identificar posibles zonas de retroceso del precio", "b) Determinar el spread", "c) Calcular el volumen", "d) Determinar noticias económicas"] },
+            { cat: "Bloque 17: Herramientas", q: "93. ¿Cuál es uno de los niveles de Fibonacci más observados por los traders?", options: ["a) 61.8%", "b) 12%", "c) 90%", "d) 5%"] },
+            { cat: "Bloque 17: Herramientas", q: "94. ¿Para qué sirve una línea de tendencia (trendline)?", options: ["a) Identificar la dirección del movimiento del precio", "b) Medir el volumen del mercado", "c) Determinar el tamaño de la posición", "d) Identificar noticias económicas"] },
+            { cat: "Bloque 17: Herramientas", q: "95. ¿Cuál es uno de los errores más comunes al usar indicadores técnicos?", options: ["a) Usar demasiados indicadores al mismo tiempo", "b) Usar stop loss", "c) Analizar temporalidades mayores", "d) Esperar confirmaciones"] },
+            { cat: "Bloque 17: Herramientas", q: "96. ¿Por qué muchos traders profesionales utilizan los indicadores solo como confirmación y no como base principal de su estrategia?", type: "corta" },
+            { cat: "Bloque 17: Herramientas", q: "97. ¿Qué ventaja tiene combinar acción del precio con indicadores técnicos en lugar de depender únicamente de uno de los dos?", type: "abierta" },
+
+            // BLOQUE 18
+            { cat: "Bloque 18: Macroeconomía", q: "98. ¿Qué mide el Producto Interno Bruto (PIB / GDP)?", options: ["a) El valor total de bienes y servicios producidos en una economía durante un periodo determinado", "b) La cantidad total de dinero que tiene el banco central", "c) El valor de las exportaciones de un país", "d) El nivel de inflación de una economía"] },
+            { cat: "Bloque 18: Macroeconomía", q: "99. ¿Qué indica una inflación elevada en una economía?", options: ["a) Que el poder adquisitivo del dinero está disminuyendo", "b) Que la economía no tiene crecimiento", "c) Que el banco central deja de intervenir", "d) Que el mercado bursátil siempre subirá"] },
+            { cat: "Bloque 18: Macroeconomía", q: "100. ¿Cuál es una de las principales herramientas que utilizan los bancos centrales para controlar la inflación?", options: ["a) Cambiar la tasa de interés", "b) Modificar el horario del mercado", "c) Cambiar el tamaño de los lotes", "d) Modificar el spread de los brokers"] },
+            { cat: "Bloque 18: Macroeconomía", q: "101. ¿Qué suele ocurrir en una economía cuando el banco central sube las tasas de interés?", options: ["a) Se incentiva el consumo", "b) Se reduce el crédito y el gasto", "c) La inflación aumenta automáticamente", "d) El mercado deja de operar"] },
+
+            // BLOQUE 19
+            { cat: "Bloque 19: Noticias", q: "102. ¿Para qué sirve un calendario económico en trading?", options: ["a) Para identificar eventos macroeconómicos que pueden generar volatilidad en el mercado", "b) Para calcular el tamaño del lote", "c) Para determinar el spread del mercado", "d) Para evitar usar indicadores técnicos"] },
+            { cat: "Bloque 19: Noticias", q: "103. ¿Qué tipo de eventos suelen generar mayor volatilidad en el mercado Forex?", options: ["a) Decisiones de tasas de interés de bancos centrales", "b) Publicaciones de indicadores técnicos", "c) Cambios en los brokers", "d) Noticias sobre empresas pequeñas"] },
+            { cat: "Bloque 19: Noticias", q: "104. ¿Qué significa que una noticia tenga “alto impacto” en el calendario económico?", options: ["a) Que puede provocar movimientos significativos en el precio", "b) Que ocurre todos los días", "c) Que tiene menor volatilidad", "d) Que solo afecta a acciones"] },
+            { cat: "Bloque 19: Noticias", q: "105. ¿Cuál de los siguientes indicadores es uno de los más observados para medir inflación en EE. UU.?", options: ["a) CPI (Consumer Price Index)", "b) RSI", "c) MACD", "d) ADX"] },
+            { cat: "Bloque 19: Noticias", q: "106. ¿Qué mide el indicador Non-Farm Payrolls (NFP) en Estados Unidos?", options: ["a) El número de empleos creados fuera del sector agrícola", "b) El crecimiento del PIB", "c) La inflación anual", "d) El volumen de trading en Wall Street"] },
+
+            // BLOQUE 20
+            { cat: "Bloque 20: Bancos Centrales", q: "107. ¿Cuál es la función principal de un banco central?", options: ["a) Gestionar la política monetaria de una economía", "b) Determinar el precio de las acciones", "c) Controlar los brokers", "d) Ejecutar órdenes en el mercado"] },
+            { cat: "Bloque 20: Bancos Centrales", q: "108. ¿Qué es la política monetaria expansiva?", options: ["a) Aumentar tasas de interés para reducir inflación", "b) Reducir tasas o inyectar liquidez para estimular la economía", "c) Eliminar el sistema bancario", "d) Aumentar los impuestos"] },
+            { cat: "Bloque 20: Bancos Centrales", q: "109. ¿Qué banco central controla la política monetaria del dólar estadounidense?", options: ["a) Federal Reserve (Fed)", "b) Banco Central Europeo", "c) Banco de Japón", "d) Fondo Monetario Internacional"] },
+
+            // BLOQUE 21
+            { cat: "Bloque 21: Geopolítica", q: "110. ¿Por qué los eventos geopolíticos pueden afectar los mercados financieros?", options: ["a) Porque pueden alterar la estabilidad económica y la percepción de riesgo", "b) Porque cambian los indicadores técnicos", "c) Porque afectan el spread del broker", "d) Porque eliminan el volumen del mercado"] },
+            { cat: "Bloque 21: Geopolítica", q: "111. ¿Qué suele ocurrir en los mercados cuando aumenta la incertidumbre geopolítica global?", options: ["a) Los inversores buscan activos considerados refugio", "b) Los mercados se detienen completamente", "c) El volumen desaparece", "d) No ocurre ningún cambio"] },
+            { cat: "Bloque 21: Geopolítica", q: "112. ¿Cuál de los siguientes activos suele considerarse un “activo refugio” en momentos de incertidumbre?", options: ["a) Oro", "b) Acciones tecnológicas", "c) Criptomonedas nuevas", "d) Índices emergentes"] },
+
+            // BLOQUE 22
+            { cat: "Bloque 22: Uso Profesional", q: "113. ¿Por qué un trader debería revisar el calendario económico antes de operar?", type: "corta" },
+            { cat: "Bloque 22: Uso Profesional", q: "114. ¿Qué riesgo existe al mantener operaciones abiertas durante noticias macroeconómicas de alto impacto?", options: ["a) Movimientos bruscos del mercado y mayor volatilidad", "b) El mercado deja de operar", "c) El broker elimina las órdenes", "d) El precio deja de moverse"] },
+            { cat: "Bloque 22: Uso Profesional", q: "115. ¿Qué herramienta utilizan muchos traders para monitorear noticias financieras globales en tiempo real?", options: ["a) Plataformas de noticias financieras o terminales de datos", "b) Indicadores técnicos", "c) Calculadoras de lotaje", "d) Robots de trading"] },
+            { cat: "Bloque 22: Uso Profesional", q: "116. ¿Qué significa el concepto de “risk-on / risk-off” en los mercados financieros?", type: "corta" },
+            { cat: "Bloque 22: Uso Profesional", q: "117. ¿Cómo debería combinarse el análisis fundamental con el análisis técnico en trading?", type: "abierta" }
+        ];
+
+        const initFirebase = async () => {
+            const config = JSON.parse(__firebase_config);
+            firebase.initializeApp(config);
+            db = firebase.firestore();
+            auth = firebase.auth();
+            auth.onAuthStateChanged(user => {
+                currentUser = user;
+                if (!user) {
+                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                        auth.signInWithCustomToken(__initial_auth_token);
+                    } else {
+                        auth.signInAnonymously();
+                    }
+                }
+            });
+        };
+
+        window.onload = initFirebase;
+
+        function startQuiz() {
+            const n = document.getElementById('reg-name').value;
+            const a = document.getElementById('reg-age').value;
+            const d = document.getElementById('reg-date').value;
+            if(!n || !a || !d) return alert("Por favor completa tus datos.");
+            quizData.name = n; quizData.age = a; quizData.evaluationDate = d;
+            document.getElementById('step-1').classList.add('hidden');
+            document.getElementById('step-quiz').classList.remove('hidden');
+            renderQuestion();
+        }
+
+        function renderQuestion() {
+            const q = questions[currentQ];
+            document.getElementById('q-category').innerText = q.cat;
+            document.getElementById('q-title').innerText = q.q;
+            document.getElementById('q-progress').innerText = `${currentQ + 1} de ${questions.length}`;
+            document.getElementById('progress-indicator').style.width = `${((currentQ + 1) / questions.length) * 100}%`;
+            
+            const container = document.getElementById('options-container');
+            container.innerHTML = '';
+
+            if(q.type === "corta" || q.type === "abierta") {
+                container.innerHTML = `
+                    <textarea id="ans-text" class="input-field min-h-[100px] mb-4 text-sm" placeholder="Escribe tu criterio aquí..."></textarea>
+                    <button onclick="saveAnswer(document.getElementById('ans-text').value)" class="btn-primary w-full">Siguiente</button>
+                `;
+            } else {
+                q.options.forEach(opt => {
+                    const btn = document.createElement('button');
+                    btn.className = "option-btn text-white";
+                    btn.innerText = opt;
+                    btn.onclick = () => saveAnswer(opt);
+                    container.appendChild(btn);
+                });
+            }
+        }
+
+        async function saveAnswer(val) {
+            if(!val || val.trim() === "") return;
+            quizData.answers.push({ q: questions[currentQ].q, a: val });
+            currentQ++;
+            if(currentQ < questions.length) {
+                renderQuestion();
+            } else {
+                await submitResults();
+            }
+        }
+
+        async function submitResults() {
+            if(!currentUser) return;
+            try {
+                await db.collection('artifacts').doc(appId).collection('public').doc('data').collection('evaluaciones').add({
+                    ...quizData,
+                    timestamp: Date.now(),
+                    uid: currentUser.uid
+                });
+                document.getElementById('step-quiz').classList.add('hidden');
+                document.getElementById('step-thanks').classList.remove('hidden');
+            } catch (e) { console.error(e); }
+        }
+
+        function showAuthModal() { document.getElementById('auth-modal').classList.remove('hidden'); }
+        function hideAuthModal() { document.getElementById('auth-modal').classList.add('hidden'); }
+        function loginAdmin() {
+            if(document.getElementById('admin-pass').value === "slange2024") {
+                hideAuthModal();
+                document.getElementById('admin-panel').classList.remove('hidden');
+                loadList();
+            } else alert("Error.");
+        }
+        function closeAdmin() { document.getElementById('admin-panel').classList.add('hidden'); }
+        function loadList() {
+            const list = document.getElementById('admin-list');
+            db.collection('artifacts').doc(appId).collection('public').doc('data').collection('evaluaciones')
+              .onSnapshot(snap => {
+                list.innerHTML = '';
+                snap.forEach(doc => {
+                    const d = doc.data();
+                    const card = document.createElement('div');
+                    card.className = "bg-[#16212E] p-5 rounded-2xl border border-[#273445] hover:border-blue-500/30 cursor-pointer";
+                    card.onclick = () => viewDetail(d);
+                    card.innerHTML = `<p class="text-[8px] text-blue-500 font-bold mb-1 uppercase">${d.evaluationDate}</p><h4 class="text-white font-bold">${d.name}</h4>`;
+                    list.appendChild(card);
+                });
+            });
+        }
+        function viewDetail(data) {
+            document.getElementById('det-name').innerText = data.name;
+            document.getElementById('det-meta').innerText = `EDAD: ${data.age} | FECHA: ${data.evaluationDate}`;
+            const content = document.getElementById('det-content');
+            content.innerHTML = '';
+            data.answers.forEach((ans, i) => {
+                content.innerHTML += `<div class="mb-4 pb-4 border-b border-white/5"><p class="text-[9px] text-gray-500 uppercase font-bold">${ans.q}</p><p class="text-blue-400 italic text-sm mt-1">${ans.a}</p></div>`;
+            });
+            document.getElementById('detail-modal').classList.remove('hidden');
+        }
+        function closeDetail() { document.getElementById('detail-modal').classList.add('hidden'); }
+    </script>
+</body>
+</html>
